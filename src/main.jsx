@@ -1,6 +1,6 @@
-import { StrictMode, useEffect, useMemo, useState } from 'react'
+import { StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ArrowUpRight, Check, CircleArrowRight, Menu, Plus, Search, ShoppingBag, Sparkles, X } from 'lucide-react'
+import { ArrowUpRight, Check, CircleArrowRight, Menu, Plus, Search, ShoppingBag, Watch, X } from 'lucide-react'
 import './styles.css'
 
 const fallbackProducts = [
@@ -22,31 +22,57 @@ const blogPosts = [
 function App() {
   const [products, setProducts] = useState(fallbackProducts)
   const [activeFilter, setActiveFilter] = useState('All watches')
+  const [searchTerm, setSearchTerm] = useState('')
   const [cart, setCart] = useState([])
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
   const [newsletter, setNewsletter] = useState('')
+  const [isSubscribing, setIsSubscribing] = useState(false)
+  const noticeTimer = useRef()
 
-  useEffect(() => {
-    fetch('/api/products').then((response) => response.json()).then((data) => setProducts(data.products)).catch(() => {})
+  const showNotice = useCallback((message) => {
+    window.clearTimeout(noticeTimer.current)
+    setNotice(message)
+    noticeTimer.current = window.setTimeout(() => setNotice(''), 3200)
   }, [])
 
-  const filteredProducts = useMemo(() => activeFilter === 'All watches' ? products : products.filter((product) => product.category === activeFilter), [activeFilter, products])
+  useEffect(() => () => window.clearTimeout(noticeTimer.current), [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch('/api/products', { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Could not load the collection.')))
+      .then((data) => Array.isArray(data.products) && setProducts(data.products))
+      .catch((error) => { if (error.name !== 'AbortError') showNotice('Showing our studio collection while the catalogue loads.') })
+    return () => controller.abort()
+  }, [showNotice])
+
+  const filteredProducts = useMemo(() => products.filter((product) => {
+    const matchesCategory = activeFilter === 'All watches' || product.category === activeFilter
+    const searchableText = `${product.name} ${product.category} ${product.description}`.toLowerCase()
+    return matchesCategory && searchableText.includes(searchTerm.trim().toLowerCase())
+  }), [activeFilter, products, searchTerm])
   const categories = ['All watches', ...new Set(products.map((product) => product.category))]
 
   function addToCart(product) {
     setCart((current) => [...current, product])
-    setNotice(`${product.name} added to your bag`)
-    window.setTimeout(() => setNotice(''), 3000)
+    showNotice(`${product.name} added to your bag`)
   }
 
   async function subscribe(event) {
     event.preventDefault()
-    const response = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: newsletter }) })
-    const data = await response.json()
-    setNotice(data.message)
-    if (response.ok) setNewsletter('')
+    setIsSubscribing(true)
+    try {
+      const response = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: newsletter }) })
+      const data = await response.json()
+      showNotice(data.message || 'Something went wrong. Please try again.')
+      if (response.ok) setNewsletter('')
+    } catch {
+      showNotice('We could not connect right now. Please try again shortly.')
+    } finally {
+      setIsSubscribing(false)
+    }
   }
 
   function scrollTo(id) {
@@ -64,11 +90,11 @@ function App() {
         </div>
         <div className="nav-actions">
           <button className="icon-button" onClick={() => setSearchOpen(!searchOpen)} aria-label="Search"><Search size={18} /></button>
-          <button className="bag-button" onClick={() => setNotice(cart.length ? `${cart.length} piece${cart.length > 1 ? 's' : ''} reserved in your bag` : 'Your bag is waiting for its first piece')}><ShoppingBag size={18} /><span>{cart.length}</span></button>
+          <button className="bag-button" onClick={() => showNotice(cart.length ? `${cart.length} piece${cart.length > 1 ? 's' : ''} reserved in your bag` : 'Your bag is waiting for its first piece')} aria-label={`Shopping bag, ${cart.length} items`}><ShoppingBag size={18} /><span>{cart.length}</span></button>
           <button className="menu-button icon-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">{menuOpen ? <X size={18} /> : <Menu size={18} />}</button>
         </div>
       </nav>
-      {searchOpen && <div className="search-bar container"><Search size={18} /><input autoFocus placeholder="Search the collection" onChange={(event) => setActiveFilter(event.target.value ? 'All watches' : activeFilter)} /><button onClick={() => setSearchOpen(false)}><X size={18} /></button></div>}
+      {searchOpen && <div className="search-bar container"><Search size={18} aria-hidden="true" /><input autoFocus value={searchTerm} onChange={(event) => { setSearchTerm(event.target.value); setActiveFilter('All watches') }} placeholder="Search the collection" aria-label="Search the collection" /><button onClick={() => setSearchOpen(false)} aria-label="Close search"><X size={18} /></button></div>}
     </header>
 
     <main id="top">
@@ -79,16 +105,16 @@ function App() {
           <p className="hero-intro">We make considered watches for people who take the scenic route. Quietly expressive. Made to stay with you.</p>
           <div className="hero-actions"><button className="button button-dark" onClick={() => scrollTo('collection')}>Explore the collection <ArrowUpRight size={16} /></button><button className="text-link" onClick={() => scrollTo('story')}>Our point of view <CircleArrowRight size={16} /></button></div>
         </div>
-        <div className="hero-visual reveal-fade"><div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><div className="hero-image-wrap"><img src="/watch/images/pngwing.com.png" alt="Polex Triton watch" /><span className="image-label">01 / Triton<br /><small>Automatic, 42mm</small></span></div><div className="hero-stamp"><Sparkles size={15} /> New release</div></div>
+        <div className="hero-visual reveal-fade"><div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><div className="hero-image-wrap"><img src="/watch/images/pngwing.com.png" alt="Polex Triton watch" /><span className="image-label">01 / Triton<br /><small>Automatic, 42mm</small></span></div></div>
         <div className="hero-aside"><span>Scroll to discover</span><div className="scroll-line" /></div>
       </section>
 
-      <section className="ticker"><div className="ticker-track"><span>Made for the moments worth remembering</span><span>Made for the moments worth remembering</span><span>Made for the moments worth remembering</span></div></section>
+      <section className="ticker"><div className="ticker-track"><span>Made for the moments worth remembering</span><Watch className="ticker-icon" size={18} aria-hidden="true" /><span>Made for the moments worth remembering</span><Watch className="ticker-icon" size={18} aria-hidden="true" /><span>Made for the moments worth remembering</span><Watch className="ticker-icon" size={18} aria-hidden="true" /></div></section>
 
       <section id="collection" className="collection section container">
         <div className="section-heading"><div><p className="eyebrow">The collection</p><h2>A little more<br /><em>you.</em></h2></div><p className="section-note">Six original silhouettes, each with its own rhythm. Find the one that feels like it was always yours.</p></div>
         <div className="filter-row">{categories.map((category) => <button className={activeFilter === category ? 'active' : ''} key={category} onClick={() => setActiveFilter(category)}>{category}</button>)}</div>
-        <div className="product-grid">{filteredProducts.map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={addToCart} />)}</div>
+        {filteredProducts.length ? <div className="product-grid">{filteredProducts.map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={addToCart} />)}</div> : <p className="empty-state">No watches match “{searchTerm}”. Try another search.</p>}
       </section>
 
       <section id="story" className="story-band"><div className="story-image"><img src="/watch/Blog Images/male-watch-188780.jpg" alt="A Polex watch on the wrist" /></div><div className="story-copy"><p className="eyebrow">A different kind of luxury</p><h2>Not louder.<br /><em>Closer.</em></h2><p>Luxury should feel lived in. Our watches are designed in Nepal, shaped by a love of material, proportion, and the small rituals that make an ordinary day yours.</p><button className="text-link light" onClick={() => scrollTo('studio')}>Meet the studio <ArrowUpRight size={16} /></button></div></section>
@@ -98,7 +124,7 @@ function App() {
       <section id="studio" className="studio section container"><div className="studio-card"><div><p className="eyebrow">Come say hello</p><h2>Made in Nepal.<br /><em>Made to wander.</em></h2><p>Our small studio is in Pokhara, where the mountains keep us patient and the lake keeps us moving.</p><button className="button button-light" onClick={() => setNotice('Studio visits are arranged by appointment')}>Visit the studio <ArrowUpRight size={16} /></button></div><div className="studio-details"><div><span>Address</span><strong>Hospital Road<br />Pokhara, Nepal</strong></div><div><span>Hours</span><strong>Sun - Fri<br />10:00 - 17:00</strong></div><div><span>Write to us</span><strong>hello@polex.watch</strong></div></div></div></section>
     </main>
 
-    <footer className="footer"><div className="container footer-grid"><div><button className="wordmark inverse" onClick={() => scrollTo('top')}><span>P</span>OLEX</button><p className="footer-blurb">For time well spent.<br />Designed in Pokhara.</p></div><div><p className="footer-label">Explore</p><button onClick={() => scrollTo('collection')}>Collection</button><button onClick={() => scrollTo('story')}>Our story</button><button onClick={() => scrollTo('journal')}>Journal</button></div><div><p className="footer-label">Stay close</p><p className="footer-blurb">New releases, thoughtful notes,<br />and the occasional good idea.</p><form onSubmit={subscribe}><input type="email" value={newsletter} onChange={(event) => setNewsletter(event.target.value)} placeholder="Your email address" required /><button aria-label="Subscribe"><ArrowUpRight size={16} /></button></form><div className="social-row"><span>Instagram</span><span>@polex.watch</span></div></div></div><div className="container footer-bottom"><span>© 2026 Polex Watch Co.</span><span>Made with intention in Nepal</span></div></footer>
+    <footer className="footer"><div className="container footer-grid"><div><button className="wordmark inverse" onClick={() => scrollTo('top')}><span>P</span>OLEX</button><p className="footer-blurb">For time well spent.<br />Designed in Pokhara.</p></div><div><p className="footer-label">Explore</p><button onClick={() => scrollTo('collection')}>Collection</button><button onClick={() => scrollTo('story')}>Our story</button><button onClick={() => scrollTo('journal')}>Journal</button></div><div><p className="footer-label">Stay close</p><p className="footer-blurb">New releases, thoughtful notes,<br />and the occasional good idea.</p><form onSubmit={subscribe}><input type="email" value={newsletter} onChange={(event) => setNewsletter(event.target.value)} placeholder="Your email address" aria-label="Email address" required /><button aria-label="Subscribe" disabled={isSubscribing}>{isSubscribing ? 'Sending' : <ArrowUpRight size={16} />}</button></form><div className="social-row"><span>Instagram</span><span>@polex.watch</span></div></div></div><div className="container footer-bottom"><span>© 2026 Polex Watch Co.</span><span>Made with intention in Nepal</span></div></footer>
   </div>
 }
 

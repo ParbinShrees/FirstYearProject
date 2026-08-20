@@ -5,9 +5,10 @@ const app = express()
 const port = process.env.PORT || 8787
 const subscribers = []
 const messages = []
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-app.use(cors())
-app.use(express.json())
+app.use(cors({ origin: process.env.CORS_ORIGIN || true }))
+app.use(express.json({ limit: '10kb' }))
 
 const products = [
   { id: 'neo', name: 'Polex Neo', price: 110000, oldPrice: 120000, image: '/watch/images/pngwing.com (1).png', category: 'Everyday', tone: 'sand', description: 'A confident daily silhouette with a calm, polished presence.' },
@@ -22,15 +23,26 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'polex-a
 app.get('/api/products', (_req, res) => res.json({ products }))
 app.post('/api/newsletter', (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase()
-  if (!email || !email.includes('@')) return res.status(400).json({ message: 'Please enter a valid email.' })
-  if (!subscribers.includes(email)) subscribers.push(email)
+  if (!emailPattern.test(email)) return res.status(400).json({ message: 'Please enter a valid email address.' })
+  if (subscribers.includes(email)) return res.status(200).json({ message: 'You are already on the list. Thank you for staying close.' })
+  subscribers.push(email)
   res.status(201).json({ message: 'You are on the list. Welcome to Polex.' })
 })
 app.post('/api/contact', (req, res) => {
-  const { name, email, message } = req.body || {}
-  if (!name || !email || !message) return res.status(400).json({ message: 'Name, email, and message are required.' })
+  const name = String(req.body?.name || '').trim()
+  const email = String(req.body?.email || '').trim().toLowerCase()
+  const message = String(req.body?.message || '').trim()
+  if (!name || !emailPattern.test(email) || !message) return res.status(400).json({ message: 'Please provide your name, a valid email address, and a message.' })
+  if (name.length > 100 || message.length > 2000) return res.status(400).json({ message: 'Please keep your name and message concise.' })
   messages.push({ name, email, message, createdAt: new Date().toISOString() })
   res.status(201).json({ message: 'Message received. Our studio will reply soon.' })
+})
+
+app.use((_req, res) => res.status(404).json({ message: 'Route not found.' }))
+app.use((error, _req, res, _next) => {
+  if (error.type === 'entity.parse.failed') return res.status(400).json({ message: 'Please send valid JSON.' })
+  console.error(error)
+  res.status(500).json({ message: 'Something went wrong on our side.' })
 })
 
 app.listen(port, () => console.log(`Polex API listening on http://localhost:${port}`))

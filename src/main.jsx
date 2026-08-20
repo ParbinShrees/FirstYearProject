@@ -1,6 +1,6 @@
 import { StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ArrowUpRight, Check, CircleArrowRight, Menu, Plus, Search, ShoppingBag, Watch, X } from 'lucide-react'
+import { ArrowUpRight, Check, CircleArrowRight, Menu, Minus, Plus, Search, ShoppingBag, Trash2, Watch, X } from 'lucide-react'
 import './styles.css'
 
 const fallbackProducts = [
@@ -24,6 +24,7 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('All watches')
   const [searchTerm, setSearchTerm] = useState('')
   const [cart, setCart] = useState([])
+  const [cartOpen, setCartOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [notice, setNotice] = useState('')
@@ -54,11 +55,37 @@ function App() {
     return matchesCategory && searchableText.includes(searchTerm.trim().toLowerCase())
   }), [activeFilter, products, searchTerm])
   const categories = ['All watches', ...new Set(products.map((product) => product.category))]
+  const cartItems = useMemo(() => Object.values(cart.reduce((items, product) => {
+    items[product.id] = items[product.id] ? { ...items[product.id], quantity: items[product.id].quantity + 1 } : { ...product, quantity: 1 }
+    return items
+  }, {})), [cart])
+  const cartTotal = useMemo(() => cart.reduce((total, product) => total + product.price, 0), [cart])
 
   function addToCart(product) {
     setCart((current) => [...current, product])
     showNotice(`${product.name} added to your bag`)
   }
+
+  function changeQuantity(productId, amount) {
+    setCart((current) => {
+      const itemIndex = current.findIndex((product) => product.id === productId)
+      if (itemIndex < 0) return current
+      if (amount < 0) return current.filter((_, index) => index !== itemIndex)
+      return [...current, current[itemIndex]]
+    })
+  }
+
+  function checkout() {
+    setCartOpen(false)
+    showNotice('Checkout is ready to connect to your preferred payment provider.')
+  }
+
+  useEffect(() => {
+    if (!cartOpen) return undefined
+    const closeOnEscape = (event) => event.key === 'Escape' && setCartOpen(false)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [cartOpen])
 
   async function subscribe(event) {
     event.preventDefault()
@@ -90,7 +117,7 @@ function App() {
         </div>
         <div className="nav-actions">
           <button className="icon-button" onClick={() => setSearchOpen(!searchOpen)} aria-label="Search"><Search size={18} /></button>
-          <button className="bag-button" onClick={() => showNotice(cart.length ? `${cart.length} piece${cart.length > 1 ? 's' : ''} reserved in your bag` : 'Your bag is waiting for its first piece')} aria-label={`Shopping bag, ${cart.length} items`}><ShoppingBag size={18} /><span>{cart.length}</span></button>
+          <button className="bag-button" onClick={() => setCartOpen(true)} aria-label={`Shopping bag, ${cart.length} items`}><ShoppingBag size={18} /><span>{cart.length}</span></button>
           <button className="menu-button icon-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">{menuOpen ? <X size={18} /> : <Menu size={18} />}</button>
         </div>
       </nav>
@@ -119,12 +146,23 @@ function App() {
 
       <section id="story" className="story-band"><div className="story-image"><img src="/watch/Blog Images/male-watch-188780.jpg" alt="A Polex watch on the wrist" /></div><div className="story-copy"><p className="eyebrow">A different kind of luxury</p><h2>Not louder.<br /><em>Closer.</em></h2><p>Luxury should feel lived in. Our watches are designed in Nepal, shaped by a love of material, proportion, and the small rituals that make an ordinary day yours.</p><button className="text-link light" onClick={() => scrollTo('studio')}>Meet the studio <ArrowUpRight size={16} /></button></div></section>
 
-      <section id="journal" className="journal section container"><div className="section-heading compact"><div><p className="eyebrow">From the journal</p><h2>Thoughts on<br /><em>keeping time.</em></h2></div><button className="text-link" onClick={() => setNotice('More stories are coming soon')}>Read the journal <ArrowUpRight size={16} /></button></div><div className="journal-grid">{blogPosts.map((post) => <article className="journal-card" key={post.title}><img src={post.image} alt="" /><div><p className="eyebrow">{post.category} <span>{post.time}</span></p><h3>{post.title}</h3><button className="arrow-link" onClick={() => setNotice('This story is being polished for you')}><ArrowUpRight size={18} /></button></div></article>)}</div></section>
+      <section id="journal" className="journal section container"><div className="section-heading compact"><div><p className="eyebrow">From the journal</p><h2>Thoughts on<br /><em>keeping time.</em></h2></div><button className="text-link" onClick={() => showNotice('More stories are coming soon')}>Read the journal <ArrowUpRight size={16} /></button></div><div className="journal-grid">{blogPosts.map((post) => <article className="journal-card" key={post.title}><img src={post.image} alt="" /><div><p className="eyebrow">{post.category} <span>{post.time}</span></p><h3>{post.title}</h3><button className="arrow-link" onClick={() => showNotice('This story is being polished for you')} aria-label={`Read ${post.title}`}><ArrowUpRight size={18} /></button></div></article>)}</div></section>
 
-      <section id="studio" className="studio section container"><div className="studio-card"><div><p className="eyebrow">Come say hello</p><h2>Made in Nepal.<br /><em>Made to wander.</em></h2><p>Our small studio is in Pokhara, where the mountains keep us patient and the lake keeps us moving.</p><button className="button button-light" onClick={() => setNotice('Studio visits are arranged by appointment')}>Visit the studio <ArrowUpRight size={16} /></button></div><div className="studio-details"><div><span>Address</span><strong>Hospital Road<br />Pokhara, Nepal</strong></div><div><span>Hours</span><strong>Sun - Fri<br />10:00 - 17:00</strong></div><div><span>Write to us</span><strong>hello@polex.watch</strong></div></div></div></section>
+      <section id="studio" className="studio section container"><div className="studio-card"><div><p className="eyebrow">Come say hello</p><h2>Made in Nepal.<br /><em>Made to wander.</em></h2><p>Our small studio is in Pokhara, where the mountains keep us patient and the lake keeps us moving.</p><button className="button button-light" onClick={() => showNotice('Studio visits are arranged by appointment')}>Visit the studio <ArrowUpRight size={16} /></button></div><div className="studio-details"><div><span>Address</span><strong>Hospital Road<br />Pokhara, Nepal</strong></div><div><span>Hours</span><strong>Sun - Fri<br />10:00 - 17:00</strong></div><div><span>Write to us</span><strong>hello@polex.watch</strong></div></div></div></section>
     </main>
 
+    {cartOpen && <CartDrawer items={cartItems} total={cartTotal} onClose={() => setCartOpen(false)} onChangeQuantity={changeQuantity} onCheckout={checkout} />}
     <footer className="footer"><div className="container footer-grid"><div><button className="wordmark inverse" onClick={() => scrollTo('top')}><span>P</span>OLEX</button><p className="footer-blurb">For time well spent.<br />Designed in Pokhara.</p></div><div><p className="footer-label">Explore</p><button onClick={() => scrollTo('collection')}>Collection</button><button onClick={() => scrollTo('story')}>Our story</button><button onClick={() => scrollTo('journal')}>Journal</button></div><div><p className="footer-label">Stay close</p><p className="footer-blurb">New releases, thoughtful notes,<br />and the occasional good idea.</p><form onSubmit={subscribe}><input type="email" value={newsletter} onChange={(event) => setNewsletter(event.target.value)} placeholder="Your email address" aria-label="Email address" required /><button aria-label="Subscribe" disabled={isSubscribing}>{isSubscribing ? 'Sending' : <ArrowUpRight size={16} />}</button></form><div className="social-row"><span>Instagram</span><span>@polex.watch</span></div></div></div><div className="container footer-bottom"><span>© 2026 Polex Watch Co.</span><span>Made with intention in Nepal</span></div></footer>
+  </div>
+}
+
+function CartDrawer({ items, total, onClose, onChangeQuantity, onCheckout }) {
+  return <div className="cart-layer" role="presentation">
+    <button className="cart-backdrop" onClick={onClose} aria-label="Close shopping bag" />
+    <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping bag">
+      <div className="cart-header"><div><p className="eyebrow">Your bag</p><h2>Selected pieces</h2></div><button className="icon-button" onClick={onClose} aria-label="Close shopping bag"><X size={20} /></button></div>
+      {items.length ? <><div className="cart-items">{items.map((item) => <article className="cart-item" key={item.id}><img src={item.image} alt="" /><div className="cart-item-details"><div><p className="product-category">{item.category}</p><h3>{item.name}</h3><span>Rs {money.format(item.price)}</span></div><div className="cart-item-actions"><div className="quantity-control"><button onClick={() => onChangeQuantity(item.id, -1)} aria-label={`Remove one ${item.name}`}><Minus size={14} /></button><span>{item.quantity}</span><button onClick={() => onChangeQuantity(item.id, 1)} aria-label={`Add one ${item.name}`}><Plus size={14} /></button></div><button className="remove-item" onClick={() => onChangeQuantity(item.id, -item.quantity)} aria-label={`Remove ${item.name}`}><Trash2 size={15} /></button></div></div></article>)}</div><div className="cart-footer"><div><span>Subtotal</span><strong>Rs {money.format(total)}</strong></div><p>Taxes and delivery are calculated at checkout.</p><button className="button button-dark" onClick={onCheckout}>Continue to checkout <ArrowUpRight size={16} /></button></div></> : <div className="cart-empty"><ShoppingBag size={26} /><h3>Your bag is waiting.</h3><p>Choose a watch that feels like yours.</p><button className="text-link" onClick={onClose}>Explore the collection <ArrowUpRight size={16} /></button></div>}
+    </aside>
   </div>
 }
 

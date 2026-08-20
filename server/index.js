@@ -5,6 +5,7 @@ const app = express()
 const port = process.env.PORT || 8787
 const subscribers = []
 const messages = []
+const orders = []
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || true }))
@@ -36,6 +37,28 @@ app.post('/api/contact', (req, res) => {
   if (name.length > 100 || message.length > 2000) return res.status(400).json({ message: 'Please keep your name and message concise.' })
   messages.push({ name, email, message, createdAt: new Date().toISOString() })
   res.status(201).json({ message: 'Message received. Our studio will reply soon.' })
+})
+app.post('/api/orders', (req, res) => {
+  const name = String(req.body?.name || '').trim()
+  const email = String(req.body?.email || '').trim().toLowerCase()
+  const address = String(req.body?.address || '').trim()
+  const city = String(req.body?.city || '').trim()
+  const items = Array.isArray(req.body?.items) ? req.body.items : []
+  if (!name || !emailPattern.test(email) || !address || !city || !items.length) return res.status(400).json({ message: 'Please complete your contact, delivery, and bag details.' })
+
+  const quantities = new Map(items.map((item) => [String(item.id), Number(item.quantity)]))
+  const orderItems = []
+  let total = 0
+  for (const [id, quantity] of quantities) {
+    const product = products.find((item) => item.id === id)
+    if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 10) return res.status(400).json({ message: 'One or more bag items are invalid.' })
+    orderItems.push({ id: product.id, name: product.name, price: product.price, quantity })
+    total += product.price * quantity
+  }
+
+  const order = { id: `PX-${Date.now().toString(36).toUpperCase()}`, name, email, address, city, items: orderItems, total, createdAt: new Date().toISOString() }
+  orders.push(order)
+  res.status(201).json({ message: 'Your order request is confirmed. We will contact you shortly.', orderId: order.id })
 })
 
 app.use((_req, res) => res.status(404).json({ message: 'Route not found.' }))

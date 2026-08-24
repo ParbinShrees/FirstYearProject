@@ -971,61 +971,84 @@ em {
   height: 6px;
 }
 
-/* TEAM ATELIER SECTION */
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
-  margin-top: 30px;
-}
-.team-card {
-  background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.team-card:hover {
-  transform: translateY(-8px);
-  border-color: var(--gold);
-  box-shadow: var(--shadow-md);
-}
-.team-photo-wrap {
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: #333;
-}
-.team-photo-wrap img {
+/* LUXURY FORMS & INPUT CONTROLS */
+.luxury-form,
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
 }
-.team-card:hover .team-photo-wrap img {
-  transform: scale(1.08);
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  text-align: left;
+  width: 100%;
 }
-.team-info {
-  padding: 16px;
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
 }
-.team-info h3 {
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0 0 4px;
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
-.team-info .team-role {
+
+.form-label {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--gold);
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 8px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
   display: block;
 }
-.team-info p {
-  font-size: 11px;
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--ink);
+  font-family: 'Manrope', sans-serif;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+  background: var(--surface);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
   color: var(--muted);
-  line-height: 1.5;
-  margin: 0;
+  opacity: 0.6;
+}
+
+.form-select {
+  cursor: pointer;
+  appearance: auto;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 70px;
 }
 
 /* JOURNAL & RESEARCH SECTION */
@@ -1210,7 +1233,6 @@ em {
 /* RESPONSIVE */
 @media (max-width: 1024px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
-  .team-grid { grid-template-columns: repeat(3, 1fr); }
   .customizer-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -1220,7 +1242,6 @@ em {
   .menu-button { display: grid; }
   .hero { grid-template-columns: 1fr; padding: 20px 0 60px; }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
-  .team-grid { grid-template-columns: repeat(2, 1fr); }
   .journal-grid, .studio-card, .wrist-guide-card { grid-template-columns: 1fr; }
   .studio-card { padding: 35px 25px; }
   .drawer-aside { padding: 24px; }
@@ -1228,7 +1249,6 @@ em {
 
 @media (max-width: 480px) {
   .product-grid { grid-template-columns: 1fr; }
-  .team-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
   h1 { font-size: 46px; }
 }

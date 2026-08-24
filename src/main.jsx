@@ -198,39 +198,6 @@ const fallbackProducts = [
   }
 ]
 
-const teamMembers = [
-  {
-    name: 'Sachin Dev Ale',
-    role: 'Lead Architecture & Systems',
-    bio: 'BIT student at Informatics College Pokhara. Spearheaded project wireframing, information architecture, and technical structural design.',
-    image: '/watch/Members/Sachin.jpg'
-  },
-  {
-    name: 'Parbin Shrees',
-    role: 'Visual Director & UI/UX',
-    bio: 'BIT student at Informatics College Pokhara. Directed visual aesthetics, digital watch styling, image color grading, and user experience.',
-    image: '/watch/Members/Parbin Shrees.jpg'
-  },
-  {
-    name: 'Prasus Thapa',
-    role: 'Frontend Engineering Lead',
-    bio: 'BIT student at Informatics College Pokhara. Authored HTML/CSS layouts and interface components, bringing digital elegance to life.',
-    image: '/watch/Members/Prasus.jpg'
-  },
-  {
-    name: 'Rajesh Adhikari',
-    role: 'Market Research & Analytics',
-    bio: 'BIT student at Informatics College Pokhara. Analyzed global horology industry growth, technological disruptions, and market metrics.',
-    image: '/watch/Members/Rajesh.jpg'
-  },
-  {
-    name: 'Rijan Pun',
-    role: 'Studio Operations & Content',
-    bio: 'BIT student at Informatics College Pokhara. Coordinated team milestones, curated journal content, and maintained collaborative velocity.',
-    image: '/watch/Members/Rijan.jpg'
-  }
-]
-
 const journalArticles = [
   {
     id: 'tech-impact',
@@ -323,9 +290,7 @@ class HorologyAudio {
 
       osc.start()
       osc.stop(this.ctx.currentTime + 0.03)
-    } catch {
-      // Ignore audio synthesis errors
-    }
+    } catch {}
   }
 
   ratchet() {
@@ -615,8 +580,7 @@ function App() {
             <button onClick={() => scrollToSection('collection')}>Collection</button>
             <button onClick={() => scrollToSection('customizer')}>Bespoke Atelier</button>
             <button onClick={() => scrollToSection('story')}>Heritage</button>
-            <button onClick={() => scrollToSection('team')}>The Team</button>
-            <button onClick={() => scrollToSection('journal')}>Journal</button>
+            <button onClick={() => scrollToSection('journal')}>Journal & Research</button>
             <button onClick={() => scrollToSection('studio')}>Pokhara Studio</button>
           </nav>
 
@@ -725,9 +689,6 @@ function App() {
             </button>
             <button className="text-left font-semibold py-2" onClick={() => scrollToSection('story')}>
               Heritage
-            </button>
-            <button className="text-left font-semibold py-2" onClick={() => scrollToSection('team')}>
-              The Team
             </button>
             <button className="text-left font-semibold py-2" onClick={() => scrollToSection('journal')}>
               Journal & Research
@@ -907,37 +868,6 @@ function App() {
           </div>
         </section>
 
-        {/* TEAM SECTION (From AboutUs) */}
-        <section id="team" className="section container">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">The Atelier Collective</p>
-              <h2>
-                Meet the<br />
-                <em>Creators.</em>
-              </h2>
-            </div>
-            <p className="section-note">
-              The designers, architects, and frontend horology enthusiasts behind the Polex vision at Informatics College Pokhara.
-            </p>
-          </div>
-
-          <div className="team-grid">
-            {teamMembers.map((member) => (
-              <div key={member.name} className="team-card">
-                <div className="team-photo-wrap">
-                  <img src={member.image} alt={member.name} />
-                </div>
-                <div className="team-info">
-                  <h3>{member.name}</h3>
-                  <span className="team-role">{member.role}</span>
-                  <p>{member.bio}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* JOURNAL & RESEARCH (From Blog & Research) */}
         <section id="journal" className="section container">
           <div className="section-heading">
@@ -1038,11 +968,11 @@ function App() {
             <button onClick={() => scrollToSection('collection')}>Timepieces</button>
             <button onClick={() => scrollToSection('customizer')}>Bespoke Atelier</button>
             <button onClick={() => scrollToSection('story')}>Our Story</button>
-            <button onClick={() => scrollToSection('team')}>Atelier Team</button>
+            <button onClick={() => scrollToSection('journal')}>Journal & Research</button>
           </div>
 
           <div className="footer-links">
-            <p className="eyebrow text-gold">Research</p>
+            <p className="eyebrow text-gold">Concierge</p>
             <button onClick={() => setActiveArticle(journalArticles[0])}>Technology Impact</button>
             <button onClick={() => setActiveArticle(journalArticles[1])}>2026 Market Trends</button>
             <button onClick={() => setBookingOpen(true)}>Book Appointment</button>
@@ -1716,8 +1646,8 @@ function CompareModal({ items, formatPrice, onClose, onRemove, onAdd }) {
           ))}
 
           {specs.map((spec) => (
-            <>
-              <div key={`label-${spec.label}`} className="compare-cell header">
+            <div key={`spec-block-${spec.label}`} style={{ display: 'contents' }}>
+              <div className="compare-cell header">
                 {spec.label}
               </div>
               {items.map((product) => (
@@ -1725,7 +1655,7 @@ function CompareModal({ items, formatPrice, onClose, onRemove, onAdd }) {
                   {spec.render ? spec.render(product) : product[spec.key]}
                 </div>
               ))}
-            </>
+            </div>
           ))}
         </div>
       </div>
@@ -1772,7 +1702,7 @@ function ArticleReaderModal({ article, onClose }) {
   )
 }
 
-// APPOINTMENT BOOKING MODAL
+// APPOINTMENT BOOKING MODAL (BEAUTIFULLY ALIGNED & STYLED)
 function AppointmentModal({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -1807,53 +1737,92 @@ function AppointmentModal({ onClose, onSuccess }) {
   return (
     <div className="search-modal-backdrop" onClick={onClose}>
       <div className="compare-modal max-w-lg" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-start mb-6 pb-4 border-b border-line">
           <div>
             <p className="eyebrow text-gold">Pokhara Atelier Consultation</p>
             <h2 className="text-2xl mb-1">Book Private Viewing</h2>
+            <p className="text-muted text-xs">Experience hand-assembled mechanical timepieces in person.</p>
           </div>
           <button className="icon-button" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
 
-        <form className="checkout-form pt-0" onSubmit={handleSubmit}>
-          <label>
-            Full Name
-            <input name="name" required placeholder="Parbin Shrees" />
-          </label>
-          <label>
-            Email Address
-            <input name="email" type="email" required placeholder="collector@polex.watch" />
-          </label>
-          <label>
-            Phone / WhatsApp
-            <input name="phone" required placeholder="+977 9800000000" />
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <label>
-              Preferred Date
-              <input name="date" type="date" required defaultValue="2026-08-28" />
-            </label>
-            <label>
-              Time Slot
-              <select name="time" className="p-3 border border-line bg-transparent" required>
-                <option value="11:00 AM">11:00 AM</option>
-                <option value="02:00 PM">02:00 PM</option>
-                <option value="04:00 PM">04:00 PM</option>
-              </select>
-            </label>
+        <form className="luxury-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="appt-name">Full Name</label>
+            <input
+              id="appt-name"
+              name="name"
+              className="form-input"
+              required
+              placeholder="e.g. Parbin Shrees"
+            />
           </div>
-          <label>
-            Interest / Notes
-            <input name="interest" placeholder="e.g. Triton Automatic & Bespoke Engraving" />
-          </label>
 
-          {error && <p className="text-red-500 text-xs">{error}</p>}
+          <div className="form-group">
+            <label className="form-label" htmlFor="appt-email">Email Address</label>
+            <input
+              id="appt-email"
+              name="email"
+              type="email"
+              className="form-input"
+              required
+              placeholder="e.g. collector@polex.watch"
+            />
+          </div>
 
-          <button className="button button-gold mt-4 justify-center" disabled={loading}>
-            {loading ? 'Confirming...' : 'Confirm Appointment'}
-          </button>
+          <div className="form-group">
+            <label className="form-label" htmlFor="appt-phone">Phone / WhatsApp</label>
+            <input
+              id="appt-phone"
+              name="phone"
+              type="tel"
+              className="form-input"
+              required
+              placeholder="e.g. +977 9800000000"
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label" htmlFor="appt-date">Preferred Date</label>
+              <input
+                id="appt-date"
+                name="date"
+                type="date"
+                className="form-input"
+                required
+                defaultValue="2026-08-28"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="appt-time">Time Slot</label>
+              <select id="appt-time" name="time" className="form-select" required>
+                <option value="11:00 AM">11:00 AM (Morning Session)</option>
+                <option value="02:00 PM">02:00 PM (Afternoon Session)</option>
+                <option value="04:00 PM">04:00 PM (Evening Tour)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="appt-notes">Interest / Specific Models</label>
+            <input
+              id="appt-notes"
+              name="interest"
+              className="form-input"
+              placeholder="e.g. Triton Automatic & Bespoke Laser Engraving"
+            />
+          </div>
+
+          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+
+          <div className="pt-2">
+            <button className="button button-gold w-full justify-center" disabled={loading}>
+              {loading ? 'Confirming...' : 'Confirm Appointment'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -1974,24 +1943,24 @@ function CartDrawer({ items, total, formatPrice, onClose, onChangeQuantity, onCh
 
         {items.length > 0 ? (
           checkoutOpen ? (
-            <form className="checkout-form flex-1 flex flex-col justify-between" onSubmit={submitOrder}>
+            <form className="luxury-form flex-1 flex flex-col justify-between pt-4" onSubmit={submitOrder}>
               <div className="space-y-4">
-                <label>
-                  Full Name
-                  <input name="name" required placeholder="Parbin Shrees" />
-                </label>
-                <label>
-                  Email Address
-                  <input name="email" type="email" required placeholder="collector@polex.watch" />
-                </label>
-                <label>
-                  Delivery Address
-                  <textarea name="address" required placeholder="Street, Ward, City" rows={2} />
-                </label>
-                <label>
-                  City / District
-                  <input name="city" required placeholder="Pokhara / Kathmandu" />
-                </label>
+                <div className="form-group">
+                  <label className="form-label">Full Name</label>
+                  <input name="name" className="form-input" required placeholder="Parbin Shrees" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email Address</label>
+                  <input name="email" type="email" className="form-input" required placeholder="collector@polex.watch" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Delivery Address</label>
+                  <textarea name="address" className="form-textarea" required placeholder="Street address, ward, house no." rows={2} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">City / District</label>
+                  <input name="city" className="form-input" required placeholder="Pokhara / Kathmandu" />
+                </div>
                 {error && <p className="text-red-500 text-xs">{error}</p>}
               </div>
 
@@ -2016,7 +1985,7 @@ function CartDrawer({ items, total, formatPrice, onClose, onChangeQuantity, onCh
                 </button>
                 <button
                   type="button"
-                  className="text-link self-center text-xs"
+                  className="text-link self-center text-xs mt-2"
                   onClick={() => setCheckoutOpen(false)}
                 >
                   Back to Bag Items
@@ -2153,4 +2122,5 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>
 )
+
 

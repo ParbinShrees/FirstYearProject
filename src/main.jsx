@@ -3,29 +3,16 @@ import { createRoot } from 'react-dom/client'
 import {
   ArrowRight,
   ArrowUpRight,
-  Bookmark,
   Calendar,
   Check,
-  ChevronRight,
-  Clock,
-  Compass,
-  CreditCard,
-  Eye,
   Heart,
   Layers,
-  MapPin,
   Menu,
   Minus,
   Moon,
   Plus,
-  RefreshCw,
-  RotateCw,
   Search,
-  Share2,
-  ShieldCheck,
   ShoppingBag,
-  Sliders,
-  Sparkles,
   Sun,
   Trash2,
   Volume2,
@@ -377,7 +364,7 @@ function App() {
     window.clearTimeout(noticeTimer.current)
     setNotice(message)
     if (chime) audioEngine.chime()
-    noticeTimer.current = window.setTimeout(() => setNotice(''), 3500)
+    noticeTimer.current = window.setTimeout(() => setNotice(''), 3200)
   }, [])
 
   useEffect(() => {
@@ -456,7 +443,7 @@ function App() {
   function addToCart(product) {
     audioEngine.chime()
     setCart((prev) => [...prev, product])
-    showNotice(`${product.name} added to your bag`)
+    showNotice(`${product.name} added to bag`)
   }
 
   function toggleWishlist(product) {
@@ -464,7 +451,7 @@ function App() {
     setWishlist((prev) => {
       const exists = prev.some((p) => p.id === product.id)
       if (exists) {
-        showNotice(`${product.name} removed from saved pieces`)
+        showNotice(`${product.name} removed from wishlist`)
         return prev.filter((p) => p.id !== product.id)
       } else {
         showNotice(`${product.name} saved to wishlist`)
@@ -480,10 +467,10 @@ function App() {
         return prev.filter((p) => p.id !== product.id)
       }
       if (prev.length >= 3) {
-        showNotice('You can compare up to 3 timepieces simultaneously.')
+        showNotice('Maximum 3 timepieces in comparison matrix.')
         return prev
       }
-      showNotice(`${product.name} added to comparison matrix.`)
+      showNotice(`${product.name} added to comparison.`)
       return [...prev, product]
     })
   }
@@ -526,7 +513,7 @@ function App() {
         setCart([])
         setCartOpen(false)
         setReceiptOrder(data.order || { id: data.orderId, ...formData, total: cartTotal })
-        showNotice('Order placed successfully! Preparing your bespoke parcel.', true)
+        showNotice('Order confirmed. Preparing your parcel.', true)
         return { ok: true }
       }
       return { ok: false, message: data.message || 'Order failed to process.' }
@@ -545,7 +532,7 @@ function App() {
         body: JSON.stringify({ email: newsletter })
       })
       const data = await res.json()
-      showNotice(data.message || 'Thank you for subscribing.', true)
+      showNotice(data.message || 'Subscription confirmed.', true)
       if (res.ok) setNewsletter('')
     } catch {
       showNotice('Subscription error. Please try again.')
@@ -564,8 +551,8 @@ function App() {
     <div className="site-shell">
       {notice && (
         <div className="toast">
-          <Sparkles size={16} color="var(--gold)" />
-          {notice}
+          <span className="toast-dot" />
+          <span>{notice}</span>
         </div>
       )}
 
@@ -609,7 +596,7 @@ function App() {
                 setSoundEnabled(!soundEnabled)
                 if (!soundEnabled) audioEngine.tick()
               }}
-              title={soundEnabled ? 'Mute Mechanical Sounds' : 'Enable Horology Sounds'}
+              title={soundEnabled ? 'Mute Mechanical Sounds' : 'Enable Mechanical Sounds'}
               aria-label="Toggle sound"
             >
               {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
@@ -622,7 +609,7 @@ function App() {
                 audioEngine.ratchet()
                 setTheme(theme === 'light' ? 'dark' : 'light')
               }}
-              title={theme === 'light' ? 'Switch to Obsidian Night' : 'Switch to Warm Atelier'}
+              title={theme === 'light' ? 'Obsidian Theme' : 'Atelier Light Theme'}
               aria-label="Toggle theme"
             >
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
@@ -635,7 +622,7 @@ function App() {
                 audioEngine.ratchet()
                 setSearchOpen(true)
               }}
-              title="Search Timepieces (Ctrl+K)"
+              title="Search (Ctrl+K)"
               aria-label="Search"
             >
               <Search size={16} />
@@ -707,26 +694,25 @@ function App() {
           <div className="hero-copy">
             <p className="eyebrow">
               <span className="eyebrow-line" />
-              <span>Independent Horology Atelier · Pokhara, Nepal</span>
-              <span className="eyebrow-badge">Calibre PX-01</span>
+              <span>Pokhara Atelier · Calibre PX-01</span>
             </p>
             <h1>
               Time,<br />
               <em>made</em> personal.
             </h1>
             <p className="hero-intro">
-              Hand-assembled mechanical timepieces made for individuals who appreciate the rhythm of craft, open-heart movements, and quiet luxury.
+              Hand-assembled mechanical timepieces engineered with open-heart architecture, surgical steel, and enduring quiet luxury.
             </p>
 
             <div className="hero-actions">
               <button className="button button-gold" onClick={() => scrollToSection('collection')}>
-                Explore Collection <ArrowRight size={16} />
+                Explore Collection <ArrowRight size={14} />
               </button>
               <button className="button button-light" onClick={() => scrollToSection('customizer')}>
-                Bespoke Atelier <Sparkles size={16} />
+                Bespoke Atelier
               </button>
               <button className="text-link" onClick={() => setBookingOpen(true)}>
-                Book Studio Tour <Calendar size={14} />
+                Book Studio Tour <ArrowUpRight size={14} />
               </button>
             </div>
           </div>
@@ -736,17 +722,28 @@ function App() {
           </div>
         </section>
 
-        {/* TICKER MARQUEE */}
+        {/* MINIMALIST TICKER */}
         <section className="ticker">
           <div className="ticker-track">
-            <span>Precision Hand-Crafted in Pokhara</span>
-            <Watch className="ticker-icon" size={20} />
+            <span>Hand-Crafted in Pokhara</span>
+            <span className="ticker-sep">·</span>
             <span>Double Anti-Reflective Sapphire Crystal</span>
-            <Sparkles className="ticker-icon" size={20} />
+            <span className="ticker-sep">·</span>
             <span>72-Hour Automatic Power Reserve</span>
-            <ShieldCheck className="ticker-icon" size={20} />
-            <span>Complimentary Insured Nationwide Delivery</span>
-            <Watch className="ticker-icon" size={20} />
+            <span className="ticker-sep">·</span>
+            <span>Calibre PX Series</span>
+            <span className="ticker-sep">·</span>
+            <span>Insured Nationwide Delivery</span>
+            <span className="ticker-sep">·</span>
+            <span>Hand-Crafted in Pokhara</span>
+            <span className="ticker-sep">·</span>
+            <span>Double Anti-Reflective Sapphire Crystal</span>
+            <span className="ticker-sep">·</span>
+            <span>72-Hour Automatic Power Reserve</span>
+            <span className="ticker-sep">·</span>
+            <span>Calibre PX Series</span>
+            <span className="ticker-sep">·</span>
+            <span>Insured Nationwide Delivery</span>
           </div>
         </section>
 
@@ -868,7 +865,7 @@ function App() {
           </div>
         </section>
 
-        {/* JOURNAL & RESEARCH (From Blog & Research) */}
+        {/* JOURNAL & RESEARCH */}
         <section id="journal" className="section container">
           <div className="section-heading">
             <div>
@@ -1108,8 +1105,8 @@ function HeroTiltWatch({ product, onOpen }) {
   const handleMouseMove = (e) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 26
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -26
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 22
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -22
     setCoords({ x, y })
   }
 
@@ -1140,7 +1137,7 @@ function HeroTiltWatch({ product, onOpen }) {
       <div className="hero-orbit orbit-1" />
       <div className="hero-orbit orbit-2" />
 
-      {/* Floating Specs */}
+      {/* Floating Minimalist Tags */}
       <div className="spec-floating-tag tag-top-left">
         <strong>Calibre PX-01</strong>
         <span>28,800 vph · 72h Reserve</span>
@@ -1187,7 +1184,7 @@ function ProductCard({
           }}
           aria-label="Save to wishlist"
         >
-          <Heart size={16} fill={isWishlisted ? '#e74c3c' : 'none'} />
+          <Heart size={15} fill={isWishlisted ? '#e74c3c' : 'none'} />
         </button>
 
         <img src={product.image} alt={product.name} />
@@ -1300,7 +1297,7 @@ function BespokeCustomizer({ onAddCustomToCart, formatPrice }) {
           </h2>
         </div>
         <p className="text-muted text-sm max-w-xs">
-          Select individual case materials, dial enamels, and personalized laser caseback engraving.
+          Select case materials, dial enamels, and caseback laser engraving.
         </p>
       </div>
 
@@ -1491,12 +1488,12 @@ function CommandPalette({ products, formatPrice, onClose, onSelect }) {
     <div className="search-modal-backdrop" onClick={onClose}>
       <div className="search-palette" onClick={(e) => e.stopPropagation()}>
         <div className="palette-header">
-          <Search size={20} className="text-gold" />
+          <Search size={18} className="text-gold" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search timepiece name, movement, diameter, category..."
+            placeholder="Search timepiece name, movement, diameter..."
           />
           <button className="icon-button" onClick={onClose}>
             <X size={16} />
@@ -1516,11 +1513,11 @@ function CommandPalette({ products, formatPrice, onClose, onSelect }) {
                   <strong>{product.name}</strong>
                   <span>{product.category} · {product.diameter} · {formatPrice(product.price)}</span>
                 </div>
-                <ArrowRight size={16} className="text-muted" />
+                <ArrowRight size={14} className="text-muted" />
               </button>
             ))
           ) : (
-            <p className="text-center text-muted py-8 text-sm">No timepieces matching "{query}"</p>
+            <p className="text-center text-muted py-8 text-sm">No timepieces found.</p>
           )}
         </div>
       </div>
@@ -1589,7 +1586,7 @@ function ProductDetailModal({ product, formatPrice, onClose, onAdd, onWishlist, 
               className={`icon-button w-12 h-12 rounded-full ${isWishlisted ? 'text-red-500' : ''}`}
               onClick={() => onWishlist(product)}
             >
-              <Heart size={20} fill={isWishlisted ? '#e74c3c' : 'none'} />
+              <Heart size={18} fill={isWishlisted ? '#e74c3c' : 'none'} />
             </button>
           </div>
         </div>
@@ -1702,7 +1699,7 @@ function ArticleReaderModal({ article, onClose }) {
   )
 }
 
-// APPOINTMENT BOOKING MODAL (BEAUTIFULLY ALIGNED & STYLED)
+// APPOINTMENT BOOKING MODAL
 function AppointmentModal({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -1877,7 +1874,7 @@ function WishlistDrawer({ items, formatPrice, onClose, onRemove, onAddToCart }) 
           </div>
         ) : (
           <div className="cart-empty flex-1 flex flex-col items-center justify-center text-center">
-            <Heart size={32} className="text-muted mb-4" />
+            <Heart size={28} className="text-muted mb-4" />
             <h3>Your wishlist is empty</h3>
             <p className="text-sm text-muted mb-4">Click the heart on any timepiece to save it for later.</p>
             <button className="button button-dark" onClick={onClose}>
@@ -2065,7 +2062,7 @@ function CartDrawer({ items, total, formatPrice, onClose, onChangeQuantity, onCh
           )
         ) : (
           <div className="cart-empty flex-1 flex flex-col items-center justify-center text-center">
-            <ShoppingBag size={32} className="text-muted mb-4" />
+            <ShoppingBag size={28} className="text-muted mb-4" />
             <h3>Your bag is empty</h3>
             <p className="text-sm text-muted mb-4">Explore our catalogue or commission a bespoke timepiece.</p>
             <button className="button button-dark" onClick={onClose}>
@@ -2084,7 +2081,7 @@ function ReceiptModal({ order, formatPrice, onClose }) {
     <div className="search-modal-backdrop" onClick={onClose}>
       <div className="compare-modal max-w-lg font-mono text-xs" onClick={(e) => e.stopPropagation()}>
         <div className="text-center pb-6 border-b border-line">
-          <Check size={36} className="mx-auto text-gold mb-2" />
+          <Check size={32} className="mx-auto text-gold mb-2" />
           <h2 className="text-xl font-sans mb-1">Polex Order Confirmed</h2>
           <p className="text-muted">Reference: <strong>{order.id}</strong></p>
         </div>

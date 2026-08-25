@@ -13,6 +13,12 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 app.use(cors({ origin: process.env.CORS_ORIGIN || true }))
 app.use(express.json({ limit: '500kb' }))
 
+// Serve static assets (images, watch photos) so admin panel at :8787 renders photos
+app.use('/watch', express.static(join(__dirname, '../public/watch')))
+app.use('/watch', express.static(join(__dirname, '../watch')))
+app.use(express.static(join(__dirname, '../public')))
+app.use(express.static(join(__dirname, '..')))
+
 // Serve Admin Panel UI
 app.get('/admin', (_req, res) => {
   try {

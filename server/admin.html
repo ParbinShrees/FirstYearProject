@@ -1,179 +1,2239 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Polex Admin</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --gold: #d4af37;
-    --ink: #0e0e0e;
-    --paper: #faf9f7;
-    --muted: #888;
-    --border: #e0ddd8;
-    --card: #fff;
-    --red: #c0392b;
-    --green: #27ae60;
-  }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
-  header { background: var(--ink); color: var(--paper); padding: 20px 40px; display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.08em; }
-  header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
-  nav { display: flex; gap: 4px; padding: 20px 40px 0; border-bottom: 1px solid var(--border); background: var(--card); }
-  nav button { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
-  nav button.active { color: var(--ink); border-bottom-color: var(--gold); }
-  nav button:hover { color: var(--ink); }
-  main { padding: 32px 40px; max-width: 1200px; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
-  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
-  .stat-value { font-size: 28px; font-weight: 700; color: var(--ink); }
-  .stat-value span { font-size: 13px; color: var(--gold); font-weight: 500; margin-left: 4px; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .panel-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-  .badge { background: var(--gold); color: var(--ink); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
-  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13px; }
-  thead th { text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: #f7f6f3; border-bottom: 1px solid var(--border); }
-  tbody td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: #fdfcfa; }
-  .status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .status.confirmed { background: #eafaf1; color: var(--green); }
-  .status.processing { background: #fef9e7; color: #b7950b; }
-  .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; }
-  .refresh { margin-left: auto; padding: 8px 16px; background: var(--ink); color: var(--paper); border: none; border-radius: 6px; font-size: 12px; cursor: pointer; letter-spacing: 0.05em; }
-  .refresh:hover { background: #222; }
-  .items-list { font-size: 12px; color: var(--muted); }
-  .items-list strong { color: var(--ink); }
-  .price { font-family: 'Courier New', monospace; font-size: 12px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polex Atelier — Master Admin Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #09090b;
+      --card: #121215;
+      --card-hover: #18181c;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --gold: #d4af37;
+      --gold-hover: #f0cc55;
+      --gold-dim: rgba(212, 175, 55, 0.12);
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --dark-muted: #52525b;
+      --green: #10b981;
+      --green-dim: rgba(16, 185, 129, 0.12);
+      --red: #ef4444;
+      --red-dim: rgba(239, 68, 68, 0.12);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.12);
+      --blue: #3b82f6;
+      --blue-dim: rgba(59, 130, 246, 0.12);
+      --purple: #a855f7;
+      --purple-dim: rgba(168, 85, 247, 0.12);
+      --font-heading: 'Playfair Display', Georgia, serif;
+      --font-body: 'Manrope', -apple-system, sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --sidebar-width: 260px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      font-size: 13.5px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #0d0d10;
+      border-right: 1px solid var(--card-border);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .brand-box {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold);
+    }
+    .brand-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .nav-list {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-section-title {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--dark-muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 12px 10px 4px;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+    .nav-btn.active {
+      background: var(--gold-dim);
+      color: var(--gold);
+      border-color: rgba(212, 175, 55, 0.25);
+      font-weight: 600;
+    }
+    .nav-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+    .nav-btn.active svg {
+      opacity: 1;
+      stroke: var(--gold);
+    }
+    .nav-badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+    .nav-btn.active .nav-badge {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(0,0,0,0.2);
+    }
+    .store-link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 14px;
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .store-link-btn:hover {
+      background: #27272a;
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* MAIN CONTENT */
+    .main-area {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      height: 64px;
+      padding: 0 32px;
+      background: rgba(13, 13, 16, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .topbar-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .clock-pill {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--muted);
+      background: #18181b;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      font-family: var(--font-body);
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: #09090b;
+    }
+    .btn-gold:hover {
+      background: var(--gold-hover);
+      transform: translateY(-1px);
+    }
+    .btn-dark {
+      background: #18181b;
+      color: var(--text);
+      border-color: var(--card-border);
+    }
+    .btn-dark:hover {
+      background: #27272a;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-danger {
+      background: var(--red-dim);
+      color: var(--red);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .btn-danger:hover {
+      background: var(--red);
+      color: #fff;
+    }
+    .btn-success {
+      background: var(--green-dim);
+      color: var(--green);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+    .btn-success:hover {
+      background: var(--green);
+      color: #fff;
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 11.5px;
+      border-radius: 6px;
+    }
+
+    /* VIEW PANELS */
+    .content-body {
+      padding: 32px;
+      flex: 1;
+    }
+    .view-panel {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .view-panel.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI STATS GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .kpi-card:hover {
+      border-color: rgba(212, 175, 55, 0.3);
+      transform: translateY(-2px);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+    .kpi-label {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .kpi-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* SECTION CARD */
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .section-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: var(--muted);
+    }
+
+    /* FILTER & SEARCH TOOLBAR */
+    .toolbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+    .search-input-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      stroke: var(--dark-muted);
+    }
+    .search-input {
+      width: 100%;
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 14px 8px 34px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus {
+      border-color: var(--gold);
+    }
+    .filter-select {
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--text);
+      font-size: 12.5px;
+      outline: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+    .filter-select:focus {
+      border-color: var(--gold);
+    }
+
+    /* DATA TABLES */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    table.data-table th {
+      padding: 12px 20px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: #151519;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+    table.data-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* BADGES & CHIPS */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .badge-gold { background: var(--gold-dim); color: var(--gold); }
+    .badge-green { background: var(--green-dim); color: var(--green); }
+    .badge-amber { background: var(--amber-dim); color: var(--amber); }
+    .badge-blue { background: var(--blue-dim); color: var(--blue); }
+    .badge-red { background: var(--red-dim); color: var(--red); }
+    .badge-purple { background: var(--purple-dim); color: var(--purple); }
+    .badge-gray { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+    /* STATUS SELECTOR */
+    .status-select {
+      background: #18181b;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 11.5px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      outline: none;
+    }
+    .status-select:focus { border-color: var(--gold); }
+
+    /* WATCH THUMBNAIL */
+    .watch-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: #1c1c20;
+      border: 1px solid var(--card-border);
+      object-fit: contain;
+      padding: 2px;
+      display: block;
+    }
+    .watch-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .watch-info strong {
+      display: block;
+      font-size: 13.5px;
+      color: var(--text);
+    }
+    .watch-info span {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    /* GRID LAYOUTS */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .grid-3col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    /* MESSAGE CARDS */
+    .msg-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 14px;
+      transition: all 0.15s;
+    }
+    .msg-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .msg-sender {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .msg-email {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .msg-time {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--dark-muted);
+    }
+    .msg-body {
+      background: #18181c;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      white-space: pre-wrap;
+    }
+    .msg-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* MODAL POPUPS */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-window {
+      background: #141418;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      width: 680px;
+      max-width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: #141418;
+      z-index: 10;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      font-family: var(--font-heading);
+      color: var(--gold);
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+
+    /* FORM STYLES */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-input, .form-textarea, .form-select-full {
+      width: 100%;
+      background: #1c1c22;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select-full:focus {
+      border-color: var(--gold);
+      background: #22222a;
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .form-checkbox-label input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 16px;
+      height: 16px;
+    }
+
+    /* INVOICE & ORDER DETAILS IN MODAL */
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+    }
+    .detail-label {
+      color: var(--muted);
+    }
+    .detail-val {
+      font-weight: 600;
+      text-align: right;
+    }
+    .order-items-box {
+      margin: 16px 0;
+      background: #18181d;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .order-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .order-item-row:last-child {
+      border-bottom: none;
+    }
+    .total-highlight {
+      margin-top: 14px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .total-highlight-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--gold);
+      font-family: var(--font-mono);
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .toast-item {
+      background: #18181c;
+      border: 1px solid var(--card-border);
+      border-left: 4px solid var(--gold);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: toastIn 0.3s ease;
+      pointer-events: auto;
+    }
+    .toast-item.error { border-left-color: var(--red); }
+    .toast-item.success { border-left-color: var(--green); }
+    @keyframes toastIn {
+      from { transform: translateX(50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2col { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="dot"></div>
-  <h1>POLEX ADMIN PANEL</h1>
-  <button class="refresh" onclick="loadAll()">Refresh</button>
-</header>
 
-<div class="stats">
-  <div class="stat"><div class="stat-label">Total Orders</div><div class="stat-value" id="s-orders">—</div></div>
-  <div class="stat"><div class="stat-label">Appointments</div><div class="stat-value" id="s-appts">—</div></div>
-  <div class="stat"><div class="stat-label">Subscribers</div><div class="stat-value" id="s-subs">—</div></div>
-  <div class="stat"><div class="stat-label">Messages</div><div class="stat-value" id="s-msgs">—</div></div>
-</div>
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <div class="brand-box">
+      <div class="brand-title">
+        <span class="brand-dot"></span>
+        POLEX
+      </div>
+      <div class="brand-sub">Pokhara Atelier · Admin</div>
+    </div>
 
-<nav>
-  <button class="active" onclick="show('orders', this)">Orders</button>
-  <button onclick="show('appointments', this)">Appointments</button>
-  <button onclick="show('subscribers', this)">Subscribers</button>
-  <button onclick="show('messages', this)">Messages</button>
-</nav>
+    <nav class="nav-list">
+      <div class="nav-section-title">Core Overview</div>
+      <button class="nav-btn active" onclick="switchTab('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
 
-<main>
-  <div id="panel-orders" class="panel active">
-    <div class="panel-title">Orders <span class="badge" id="b-orders">0</span></div>
-    <div id="tbl-orders"></div>
+      <div class="nav-section-title">Store Operations</div>
+      <button class="nav-btn" onclick="switchTab('products')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"/></svg>
+        Watch Catalog
+        <span class="nav-badge" id="badge-products">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Orders
+        <span class="nav-badge" id="badge-orders">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('appointments')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        VIP Bookings
+        <span class="nav-badge" id="badge-appointments">0</span>
+      </button>
+
+      <div class="nav-section-title">Marketing & Site</div>
+      <button class="nav-btn" onclick="switchTab('promos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+        Promo Codes
+        <span class="nav-badge" id="badge-promos">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('messages')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Inquiries
+        <span class="nav-badge" id="badge-messages">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('subscribers')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Subscribers
+        <span class="nav-badge" id="badge-subscribers">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Site & Ticker Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="http://localhost:5173" target="_blank" class="store-link-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Live Storefront
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title" id="page-heading">Atelier Dashboard</div>
+          <div class="topbar-sub" id="page-subheading">Real-time store metrics, inventory, orders & viewings</div>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="clock-pill" id="live-clock">--:--:--</div>
+        <button class="btn btn-gold btn-sm" onclick="openProductModal()">+ Add New Watch</button>
+        <button class="btn btn-dark btn-sm" onclick="loadAllData()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh Data
+        </button>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-panel active">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Gross Revenue <span>NPR</span></div>
+            <div class="kpi-value" id="kpi-revenue">Rs 0</div>
+            <div class="kpi-sub" id="kpi-revenue-sub">From 0 completed/active orders</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Orders <span>📦</span></div>
+            <div class="kpi-value" id="kpi-orders">0</div>
+            <div class="kpi-sub" id="kpi-orders-sub">0 pending dispatch</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">VIP Bookings <span>📅</span></div>
+            <div class="kpi-value" id="kpi-appts">0</div>
+            <div class="kpi-sub" id="kpi-appts-sub">0 confirmed appointments</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Watch Catalog <span>⌚</span></div>
+            <div class="kpi-value" id="kpi-products">0</div>
+            <div class="kpi-sub" id="kpi-products-sub">Available in store catalog</div>
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <!-- RECENT ORDERS -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-title">Recent Client Orders</div>
+              <button class="btn btn-dark btn-sm" onclick="switchTab('orders')">View All Orders →</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-orders-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RECENT APPOINTMENTS -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-title">Upcoming VIP Viewings</div>
+              <button class="btn btn-dark btn-sm" onclick="switchTab('appointments')">View All Bookings →</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Guest</th>
+                    <th>Date & Time</th>
+                    <th>Watch Interest</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-appts-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. WATCH CATALOG VIEW (PRODUCT MANAGEMENT) -->
+      <section id="view-products" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              Atelier Timepiece Catalog
+              <span class="section-count" id="count-products">0 watches</span>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="openProductModal()">+ Add New Timepiece</button>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="product-search" class="search-input" placeholder="Search by model name, calibre, category..." oninput="renderProductsTable()">
+            </div>
+            <select id="product-filter-category" class="filter-select" onchange="renderProductsTable()">
+              <option value="">All Categories</option>
+              <option value="Signature">Signature</option>
+              <option value="Everyday">Everyday</option>
+              <option value="Field">Field</option>
+              <option value="Sport">Sport</option>
+              <option value="Limited">Limited</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Model / Details</th>
+                  <th>Category</th>
+                  <th>Price (NPR)</th>
+                  <th>Specs</th>
+                  <th>Stock</th>
+                  <th>Featured</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. ORDERS VIEW -->
+      <section id="view-orders" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              Client Orders & Fulfillment
+              <span class="section-count" id="count-orders">0 orders</span>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="order-search" class="search-input" placeholder="Search by order ID, customer name, email, city..." oninput="renderOrdersTable()">
+            </div>
+            <select id="order-filter-status" class="filter-select" onchange="renderOrdersTable()">
+              <option value="">All Statuses</option>
+              <option value="Processing in Pokhara Atelier">Processing in Pokhara Atelier</option>
+              <option value="Ready for Dispatch">Ready for Dispatch</option>
+              <option value="Dispatched">Dispatched</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items Ordered</th>
+                  <th>Total</th>
+                  <th>Order Status</th>
+                  <th>Placed At</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. APPOINTMENTS VIEW -->
+      <section id="view-appointments" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              VIP Viewing Appointments
+              <span class="section-count" id="count-appointments">0 bookings</span>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="appt-search" class="search-input" placeholder="Search by guest name, email, phone..." oninput="renderAppointmentsTable()">
+            </div>
+            <select id="appt-filter-status" class="filter-select" onchange="renderAppointmentsTable()">
+              <option value="">All Statuses</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Guest Name</th>
+                  <th>Contact Details</th>
+                  <th>Date & Time</th>
+                  <th>Interest</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appointments-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PROMO CODES VIEW -->
+      <section id="view-promos" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              Promotional Codes & Discounts
+              <span class="section-count" id="count-promos">0 codes</span>
+            </div>
+            <button class="btn btn-gold btn-sm" onclick="openPromoModal()">+ Create Promo Code</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Promo Code</th>
+                  <th>Discount Value</th>
+                  <th>Min. Order Value</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="promos-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. MESSAGES VIEW -->
+      <section id="view-messages" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              Client Inquiries & Contact Form Submissions
+              <span class="section-count" id="count-messages">0 inquiries</span>
+            </div>
+          </div>
+          <div style="padding: 24px;" id="messages-container"></div>
+        </div>
+      </section>
+
+      <!-- 7. SUBSCRIBERS VIEW -->
+      <section id="view-subscribers" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              Collector Newsletter Subscribers
+              <span class="section-count" id="count-subscribers">0 collectors</span>
+            </div>
+            <button class="btn btn-dark btn-sm" onclick="exportSubscribersCSV()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Email Address</th>
+                  <th>Subscribed Date</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="subscribers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. SITE SETTINGS VIEW -->
+      <section id="view-settings" class="view-panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Storefront Announcement & Atelier Settings</div>
+            <button class="btn btn-gold btn-sm" onclick="saveSettingsForm()">Save All Changes</button>
+          </div>
+          <div style="padding: 24px;">
+            <form id="settings-form" onsubmit="event.preventDefault(); saveSettingsForm();">
+              <div class="form-group">
+                <label class="form-label">Top Horology Announcement Bar / Ticker Text</label>
+                <textarea id="set-ticker_text" class="form-textarea" rows="3" placeholder="Hand-Crafted in Pokhara · Double Sapphire Crystal..."></textarea>
+                <small style="color: var(--muted); font-size: 11px; margin-top: 4px; display: block;">This marquee bar scrolls continuously across the top of the user store.</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Storefront Notice / Banner</label>
+                <input type="text" id="set-store_notice" class="form-input" placeholder="Private Viewings & Bespoke Commissions Available Upon Request.">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Atelier Phone / WhatsApp</label>
+                  <input type="text" id="set-atelier_phone" class="form-input" placeholder="+977 9800000000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Concierge Email</label>
+                  <input type="email" id="set-atelier_email" class="form-input" placeholder="concierge@polex.watch">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Physical Atelier Address</label>
+                <input type="text" id="set-atelier_address" class="form-input" placeholder="Polex Atelier, Hospital Road, Pokhara, Nepal">
+              </div>
+
+              <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-gold">Save Atelier Settings</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
-  <div id="panel-appointments" class="panel">
-    <div class="panel-title">Appointments <span class="badge" id="b-appts">0</span></div>
-    <div id="tbl-appts"></div>
+
+  <!-- PRODUCT CREATE / EDIT MODAL -->
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title" id="product-modal-title">Add New Timepiece</div>
+        <button class="modal-close-btn" onclick="closeProductModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form" onsubmit="event.preventDefault(); submitProductForm();">
+          <input type="hidden" id="pf-id">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Watch Model Name *</label>
+              <input type="text" id="pf-name" class="form-input" required placeholder="e.g. Polex Meridian Tourbillon">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select id="pf-category" class="form-select-full">
+                <option value="Signature">Signature</option>
+                <option value="Everyday">Everyday</option>
+                <option value="Field">Field</option>
+                <option value="Sport">Sport</option>
+                <option value="Limited">Limited</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">Price (NPR) *</label>
+              <input type="number" id="pf-price" class="form-input" required placeholder="140000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Original / Retail Price (NPR)</label>
+              <input type="number" id="pf-old_price" class="form-input" placeholder="160000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock Quantity</label>
+              <input type="number" id="pf-stock" class="form-input" value="10">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Watch Image Path or URL *</label>
+            <input type="text" id="pf-image" class="form-input" required placeholder="/watch/images/pngwing.com.png">
+            <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-dark btn-sm" onclick="document.getElementById('pf-image').value='/watch/images/pngwing.com.png'">Image 1 (Triton)</button>
+              <button type="button" class="btn btn-dark btn-sm" onclick="document.getElementById('pf-image').value='/watch/images/pngwing.com (1).png'">Image 2 (Neo)</button>
+              <button type="button" class="btn btn-dark btn-sm" onclick="document.getElementById('pf-image').value='/watch/images/pngwing.com (3).png'">Image 3 (Horizon)</button>
+              <button type="button" class="btn btn-dark btn-sm" onclick="document.getElementById('pf-image').value='/watch/images/pngwing.com (2).png'">Image 4 (Crimson)</button>
+              <button type="button" class="btn btn-dark btn-sm" onclick="document.getElementById('pf-image').value='/watch/images/pngwing.com (4).png'">Image 5 (Chrono)</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Dial Diameter</label>
+              <input type="text" id="pf-diameter" class="form-input" placeholder="42mm">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Movement Calibre</label>
+              <input type="text" id="pf-movement" class="form-input" placeholder="Automatic Calibre PX-01">
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">Power Reserve</label>
+              <input type="text" id="pf-power_reserve" class="form-input" placeholder="72 Hours">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Water Resistance</label>
+              <input type="text" id="pf-water_resistance" class="form-input" placeholder="100m / 10 ATM">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dial Tone / Hue</label>
+              <select id="pf-tone" class="form-select-full">
+                <option value="sand">Sand / Gold</option>
+                <option value="blue">Ice Blue / Navy</option>
+                <option value="red">Crimson / Burgundy</option>
+                <option value="moss">Himalayan Moss Green</option>
+                <option value="ink">Obsidian Ink Black</option>
+                <option value="orange">Vintage Amber</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Glass Crystal</label>
+              <input type="text" id="pf-glass" class="form-input" placeholder="Domed Sapphire Crystal">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Case / Bezel Material</label>
+              <input type="text" id="pf-case_material" class="form-input" placeholder="316L Brushed Stainless Steel">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Horological Story & Description *</label>
+            <textarea id="pf-description" class="form-textarea" rows="3" required placeholder="Describe craftsmanship, open heart balance wheel, finish..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-checkbox-label">
+              <input type="checkbox" id="pf-featured">
+              Feature on Homepage Carousel & Hero
+            </label>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+            <button type="button" class="btn btn-dark" onclick="closeProductModal()">Cancel</button>
+            <button type="submit" class="btn btn-gold">Save Timepiece</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <div id="panel-subscribers" class="panel">
-    <div class="panel-title">Newsletter Subscribers <span class="badge" id="b-subs">0</span></div>
-    <div id="tbl-subs"></div>
+
+  <!-- ORDER DETAILS MODAL -->
+  <div class="modal-overlay" id="order-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title" id="om-title">Order Details</div>
+        <button class="modal-close-btn" onclick="closeOrderModal()">✕</button>
+      </div>
+      <div class="modal-body" id="om-body"></div>
+    </div>
   </div>
-  <div id="panel-messages" class="panel">
-    <div class="panel-title">Contact Messages <span class="badge" id="b-msgs">0</span></div>
-    <div id="tbl-msgs"></div>
+
+  <!-- PROMO MODAL -->
+  <div class="modal-overlay" id="promo-modal">
+    <div class="modal-window" style="width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">Create Promo Code</div>
+        <button class="modal-close-btn" onclick="closePromoModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="promo-form" onsubmit="event.preventDefault(); submitPromoForm();">
+          <div class="form-group">
+            <label class="form-label">Promo Code *</label>
+            <input type="text" id="prof-code" class="form-input" style="text-transform: uppercase; font-family: var(--font-mono);" required placeholder="e.g. VIP2026">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Percentage Discount (%)</label>
+              <input type="number" id="prof-percent" class="form-input" placeholder="10" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Flat Discount (NPR)</label>
+              <input type="number" id="prof-flat" class="form-input" placeholder="0" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minimum Order Requirement (NPR)</label>
+            <input type="number" id="prof-min" class="form-input" placeholder="0">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn btn-dark" onclick="closePromoModal()">Cancel</button>
+            <button type="submit" class="btn btn-gold">Create Promo Code</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-</main>
 
-<script>
-const API = 'http://localhost:8787'
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-box"></div>
 
-function show(tab, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'))
-  document.getElementById('panel-' + tab).classList.add('active')
-  btn.classList.add('active')
-}
+  <script>
+    const API = 'http://localhost:8787';
 
-function fmt(d) {
-  return new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
-}
-function money(n) { return 'NPR ' + Number(n).toLocaleString() }
+    // State Store
+    const state = {
+      analytics: {},
+      products: [],
+      orders: [],
+      appointments: [],
+      promos: [],
+      messages: [],
+      subscribers: [],
+      settings: {}
+    };
 
-async function loadAll() {
-  const [orders, appts, subs, msgs] = await Promise.all([
-    fetch(API + '/api/admin/orders').then(r => r.json()),
-    fetch(API + '/api/admin/appointments').then(r => r.json()),
-    fetch(API + '/api/admin/subscribers').then(r => r.json()),
-    fetch(API + '/api/admin/messages').then(r => r.json()),
-  ])
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-US', { hour12: true });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-  document.getElementById('s-orders').textContent = orders.count
-  document.getElementById('s-appts').textContent = appts.count
-  document.getElementById('s-subs').textContent = subs.count
-  document.getElementById('s-msgs').textContent = msgs.count
-  document.getElementById('b-orders').textContent = orders.count
-  document.getElementById('b-appts').textContent = appts.count
-  document.getElementById('b-subs').textContent = subs.count
-  document.getElementById('b-msgs').textContent = msgs.count
+    // Toast Alert
+    function showToast(msg, type = 'gold') {
+      const box = document.getElementById('toast-box');
+      const el = document.createElement('div');
+      el.className = `toast-item ${type}`;
+      el.innerHTML = `<span>${type === 'error' ? '✕' : type === 'success' ? '✓' : '✦'}</span> <span>${msg}</span>`;
+      box.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(10px)';
+        el.style.transition = 'all 0.3s';
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
 
-  // Orders
-  document.getElementById('tbl-orders').innerHTML = orders.count === 0
-    ? '<div class="empty">No orders yet.</div>'
-    : `<table><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>
-      ${orders.data.map(o => `<tr>
-        <td><code>${o.id}</code></td>
-        <td><strong>${o.name}</strong><br/><small>${o.email}</small><br/><small>${o.city}</small></td>
-        <td><div class="items-list">${(o.items||[]).map(i => `<strong>${i.name}</strong> x${i.quantity}`).join('<br/>')}</div></td>
-        <td class="price">${money(o.total)}${o.discount ? `<br/><small style="color:#27ae60">-${money(o.discount)} discount</small>` : ''}</td>
-        <td><span class="status processing">${o.status}</span></td>
-        <td>${fmt(o.created_at)}</td>
-      </tr>`).join('')}
-      </tbody></table>`
+    // Tab Navigation
+    const tabHeaders = {
+      dashboard: ['Atelier Dashboard', 'Real-time store metrics, inventory, orders & viewings'],
+      products: ['Watch Catalog & Inventory', 'Create, update specs, pricing, and showcase featured watches'],
+      orders: ['Orders & Fulfillment', 'Manage client orders, review shipping addresses, and update dispatch status'],
+      appointments: ['VIP Viewing Appointments', 'Manage private consultations and studio tours in Pokhara'],
+      promos: ['Discounts & Promo Codes', 'Configure percentage or flat rate promotional discount codes'],
+      messages: ['Client Inquiries', 'Direct messages and consultation inquiries from the storefront'],
+      subscribers: ['Collector Newsletter List', 'VIP subscribers registered for exclusive watch releases'],
+      settings: ['Storefront & Atelier Settings', 'Customize announcement marquee, contact details, and site notices']
+    };
 
-  // Appointments
-  document.getElementById('tbl-appts').innerHTML = appts.count === 0
-    ? '<div class="empty">No appointments yet.</div>'
-    : `<table><thead><tr><th>Booking ID</th><th>Guest</th><th>Date & Time</th><th>Interest</th><th>Status</th></tr></thead><tbody>
-      ${appts.data.map(a => `<tr>
-        <td><code>${a.id}</code></td>
-        <td><strong>${a.name}</strong><br/><small>${a.email}</small><br/><small>${a.phone}</small></td>
-        <td>${a.date}<br/><small>${a.time}</small></td>
-        <td>${a.interest}</td>
-        <td><span class="status confirmed">${a.status}</span></td>
-      </tr>`).join('')}
-      </tbody></table>`
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // Subscribers
-  document.getElementById('tbl-subs').innerHTML = subs.count === 0
-    ? '<div class="empty">No subscribers yet.</div>'
-    : `<table><thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead><tbody>
-      ${subs.data.map((s, i) => `<tr>
-        <td>${s.id}</td>
-        <td>${s.email}</td>
-        <td>${fmt(s.created_at)}</td>
-      </tr>`).join('')}
-      </tbody></table>`
+      const target = document.getElementById(`view-${tabId}`);
+      if (target) target.classList.add('active');
 
-  // Messages
-  document.getElementById('tbl-msgs').innerHTML = msgs.count === 0
-    ? '<div class="empty">No messages yet.</div>'
-    : `<table><thead><tr><th>From</th><th>Email</th><th>Message</th><th>Date</th></tr></thead><tbody>
-      ${msgs.data.map(m => `<tr>
-        <td><strong>${m.name}</strong></td>
-        <td>${m.email}</td>
-        <td style="max-width:320px">${m.message}</td>
-        <td>${fmt(m.created_at)}</td>
-      </tr>`).join('')}
-      </tbody></table>`
-}
+      const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
 
-loadAll()
-</script>
+      const info = tabHeaders[tabId] || ['Admin Console', ''];
+      document.getElementById('page-heading').textContent = info[0];
+      document.getElementById('page-subheading').textContent = info[1];
+    }
+
+    // Load All Data from API
+    async function loadAllData() {
+      try {
+        const [anaRes, prodRes, ordRes, apptRes, promoRes, msgRes, subRes, setRes] = await Promise.all([
+          fetch(`${API}/api/admin/analytics`).then(r => r.json()).catch(() => ({})),
+          fetch(`${API}/api/admin/products`).then(r => r.json()).catch(() => ({ data: [] })),
+          fetch(`${API}/api/admin/orders`).then(r => r.json()).catch(() => ({ data: [] })),
+          fetch(`${API}/api/admin/appointments`).then(r => r.json()).catch(() => ({ data: [] })),
+          fetch(`${API}/api/admin/promos`).then(r => r.json()).catch(() => ({ data: [] })),
+          fetch(`${API}/api/admin/messages`).then(r => r.json()).catch(() => ({ data: [] })),
+          fetch(`${API}/api/admin/subscribers`).then(r => r.json()).catch(() => ({ data: [] })),
+          fetch(`${API}/api/admin/settings`).then(r => r.json()).catch(() => ({ settings: {} }))
+        ]);
+
+        state.analytics = anaRes || {};
+        state.products = prodRes.data || [];
+        state.orders = ordRes.data || [];
+        state.appointments = apptRes.data || [];
+        state.promos = promoRes.data || [];
+        state.messages = msgRes.data || [];
+        state.subscribers = subRes.data || [];
+        state.settings = setRes.settings || {};
+
+        updateBadgesAndKPIs();
+        renderDashboard();
+        renderProductsTable();
+        renderOrdersTable();
+        renderAppointmentsTable();
+        renderPromosTable();
+        renderMessages();
+        renderSubscribersTable();
+        populateSettingsForm();
+
+        showToast('All atelier data synchronized with SQLite.', 'success');
+      } catch (err) {
+        showToast('Failed to load database data: ' + err.message, 'error');
+      }
+    }
+
+    function updateBadgesAndKPIs() {
+      // Sidebar Badges
+      document.getElementById('badge-products').textContent = state.products.length;
+      document.getElementById('badge-orders').textContent = state.orders.length;
+      document.getElementById('badge-appointments').textContent = state.appointments.length;
+      document.getElementById('badge-promos').textContent = state.promos.length;
+      document.getElementById('badge-messages').textContent = state.messages.length;
+      document.getElementById('badge-subscribers').textContent = state.subscribers.length;
+
+      // Section counts
+      document.getElementById('count-products').textContent = `${state.products.length} watches`;
+      document.getElementById('count-orders').textContent = `${state.orders.length} orders`;
+      document.getElementById('count-appointments').textContent = `${state.appointments.length} bookings`;
+      document.getElementById('count-promos').textContent = `${state.promos.length} codes`;
+      document.getElementById('count-messages').textContent = `${state.messages.length} inquiries`;
+      document.getElementById('count-subscribers').textContent = `${state.subscribers.length} collectors`;
+
+      // KPI cards
+      const rev = state.orders.reduce((sum, o) => sum + (o.total || 0), 0);
+      document.getElementById('kpi-revenue').textContent = `Rs ${rev.toLocaleString()}`;
+      document.getElementById('kpi-revenue-sub').textContent = `From ${state.orders.length} total orders`;
+
+      document.getElementById('kpi-orders').textContent = state.orders.length;
+      const pendingOrd = state.orders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length;
+      document.getElementById('kpi-orders-sub').textContent = `${pendingOrd} processing / dispatching`;
+
+      document.getElementById('kpi-appts').textContent = state.appointments.length;
+      const confAppt = state.appointments.filter(a => a.status === 'Confirmed').length;
+      document.getElementById('kpi-appts-sub').textContent = `${confAppt} confirmed upcoming`;
+
+      document.getElementById('kpi-products').textContent = state.products.length;
+      document.getElementById('kpi-products-sub').textContent = `${state.products.filter(p => p.featured).length} featured on hero`;
+    }
+
+    // ==========================================
+    // 1. DASHBOARD RENDERING
+    // ==========================================
+    function renderDashboard() {
+      // Recent orders
+      const ordTbody = document.getElementById('dash-orders-tbody');
+      const recentOrders = state.orders.slice(0, 5);
+      if (recentOrders.length === 0) {
+        ordTbody.innerHTML = `<tr><td colspan="4" class="empty-state">No orders placed yet.</td></tr>`;
+      } else {
+        ordTbody.innerHTML = recentOrders.map(o => `
+          <tr style="cursor: pointer;" onclick="openOrderModal('${o.id}')">
+            <td><strong style="font-family: var(--font-mono); color: var(--gold);">${o.id}</strong></td>
+            <td>${escapeHtml(o.name)}<br><small style="color: var(--muted);">${escapeHtml(o.city)}</small></td>
+            <td style="font-family: var(--font-mono); font-weight: 600;">Rs ${Number(o.total).toLocaleString()}</td>
+            <td><span class="badge ${getStatusBadgeClass(o.status)}">${o.status}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // Recent appointments
+      const apptTbody = document.getElementById('dash-appts-tbody');
+      const recentAppts = state.appointments.slice(0, 5);
+      if (recentAppts.length === 0) {
+        apptTbody.innerHTML = `<tr><td colspan="4" class="empty-state">No VIP bookings registered yet.</td></tr>`;
+      } else {
+        apptTbody.innerHTML = recentAppts.map(a => `
+          <tr>
+            <td><strong>${escapeHtml(a.name)}</strong><br><small style="color: var(--muted);">${escapeHtml(a.phone)}</small></td>
+            <td>${escapeHtml(a.date)}<br><small style="color: var(--muted);">${escapeHtml(a.time)}</small></td>
+            <td style="max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(a.interest)}</td>
+            <td><span class="badge ${getStatusBadgeClass(a.status)}">${a.status}</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // ==========================================
+    // 2. WATCH CATALOG MANAGEMENT
+    // ==========================================
+    function renderProductsTable() {
+      const q = (document.getElementById('product-search')?.value || '').toLowerCase().trim();
+      const cat = document.getElementById('product-filter-category')?.value || '';
+
+      const filtered = state.products.filter(p => {
+        const matchQ = !q || p.name.toLowerCase().includes(q) || p.movement.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+        const matchCat = !cat || p.category === cat;
+        return matchQ && matchCat;
+      });
+
+      const tbody = document.getElementById('products-tbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No watches match your search criteria.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => `
+        <tr>
+          <td>
+            <div class="watch-cell">
+              <img src="${p.image}" class="watch-thumb" alt="${escapeHtml(p.name)}" onerror="this.src='/watch/images/pngwing.com.png'">
+              <div class="watch-info">
+                <strong>${escapeHtml(p.name)}</strong>
+                <span>${p.diameter} · ${escapeHtml(p.movement)}</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-gray">${escapeHtml(p.category)}</span></td>
+          <td>
+            <div style="font-family: var(--font-mono); font-weight: 700; color: var(--gold);">Rs ${Number(p.price).toLocaleString()}</div>
+            ${p.old_price ? `<div style="font-size: 11px; color: var(--dark-muted); text-decoration: line-through; font-family: var(--font-mono);">Rs ${Number(p.old_price).toLocaleString()}</div>` : ''}
+          </td>
+          <td style="font-size: 12px; color: var(--muted); max-width: 180px;">
+            ${p.power_reserve} · ${p.water_resistance}<br>
+            <span style="color: var(--dark-muted);">${escapeHtml(p.glass)}</span>
+          </td>
+          <td>
+            <span style="font-family: var(--font-mono); font-weight: 600; ${p.stock <= 5 ? 'color: var(--red);' : ''}">${p.stock} units</span>
+          </td>
+          <td>
+            <button class="btn btn-sm ${p.featured ? 'btn-gold' : 'btn-dark'}" onclick="toggleProductFeatured('${p.id}')">
+              ${p.featured ? '★ Featured' : '☆ Standard'}
+            </button>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px;">
+              <button class="btn btn-dark btn-sm" onclick="editProductModal('${p.id}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}', '${escapeHtml(p.name)}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openProductModal() {
+      document.getElementById('product-modal-title').textContent = 'Add New Timepiece to Catalog';
+      document.getElementById('product-form').reset();
+      document.getElementById('pf-id').value = '';
+      document.getElementById('pf-image').value = '/watch/images/pngwing.com.png';
+      document.getElementById('pf-stock').value = '10';
+      document.getElementById('product-modal').classList.add('open');
+    }
+
+    function editProductModal(id) {
+      const p = state.products.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('product-modal-title').textContent = `Edit Timepiece — ${p.name}`;
+      document.getElementById('pf-id').value = p.id;
+      document.getElementById('pf-name').value = p.name;
+      document.getElementById('pf-category').value = p.category;
+      document.getElementById('pf-price').value = p.price;
+      document.getElementById('pf-old_price').value = p.old_price || '';
+      document.getElementById('pf-stock').value = p.stock || 10;
+      document.getElementById('pf-image').value = p.image;
+      document.getElementById('pf-diameter').value = p.diameter || '40mm';
+      document.getElementById('pf-movement').value = p.movement || 'Automatic Calibre PX-01';
+      document.getElementById('pf-power_reserve').value = p.power_reserve || '72 Hours';
+      document.getElementById('pf-water_resistance').value = p.water_resistance || '100m / 10 ATM';
+      document.getElementById('pf-tone').value = p.tone || 'sand';
+      document.getElementById('pf-glass').value = p.glass || 'Double Anti-Reflective Sapphire';
+      document.getElementById('pf-case_material').value = p.case_material || '316L Brushed Stainless Steel';
+      document.getElementById('pf-description').value = p.description || '';
+      document.getElementById('pf-featured').checked = Boolean(p.featured);
+
+      document.getElementById('product-modal').classList.add('open');
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').classList.remove('open');
+    }
+
+    async function submitProductForm() {
+      const id = document.getElementById('pf-id').value;
+      const isEdit = Boolean(id);
+
+      const payload = {
+        name: document.getElementById('pf-name').value.trim(),
+        category: document.getElementById('pf-category').value,
+        price: Number(document.getElementById('pf-price').value),
+        old_price: document.getElementById('pf-old_price').value ? Number(document.getElementById('pf-old_price').value) : null,
+        stock: Number(document.getElementById('pf-stock').value) || 10,
+        image: document.getElementById('pf-image').value.trim(),
+        diameter: document.getElementById('pf-diameter').value.trim(),
+        movement: document.getElementById('pf-movement').value.trim(),
+        power_reserve: document.getElementById('pf-power_reserve').value.trim(),
+        water_resistance: document.getElementById('pf-water_resistance').value.trim(),
+        tone: document.getElementById('pf-tone').value,
+        glass: document.getElementById('pf-glass').value.trim(),
+        case_material: document.getElementById('pf-case_material').value.trim(),
+        description: document.getElementById('pf-description').value.trim(),
+        featured: document.getElementById('pf-featured').checked
+      };
+
+      try {
+        const url = isEdit ? `${API}/api/admin/products/${id}` : `${API}/api/admin/products`;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Action failed');
+
+        showToast(isEdit ? 'Watch specs updated in SQLite.' : 'New watch created and published to storefront.', 'success');
+        closeProductModal();
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function toggleProductFeatured(id) {
+      try {
+        const res = await fetch(`${API}/api/admin/products/${id}/toggle-featured`, { method: 'PATCH' });
+        if (!res.ok) throw new Error('Toggle failed');
+        showToast('Featured status updated.', 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteProduct(id, name) {
+      if (!confirm(`Are you sure you want to permanently delete "${name}" from the catalog?`)) return;
+      try {
+        const res = await fetch(`${API}/api/admin/products/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Deletion failed');
+        showToast(`"${name}" removed from catalog.`, 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ==========================================
+    // 3. ORDERS MANAGEMENT
+    // ==========================================
+    function renderOrdersTable() {
+      const q = (document.getElementById('order-search')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('order-filter-status')?.value || '';
+
+      const filtered = state.orders.filter(o => {
+        const matchQ = !q || o.id.toLowerCase().includes(q) || o.name.toLowerCase().includes(q) || o.email.toLowerCase().includes(q) || o.city.toLowerCase().includes(q);
+        const matchStatus = !statusFilter || o.status === statusFilter;
+        return matchQ && matchStatus;
+      });
+
+      const tbody = document.getElementById('orders-tbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No client orders match your search.</td></tr>`;
+        return;
+      }
+
+      const statuses = ['Processing in Pokhara Atelier', 'Ready for Dispatch', 'Dispatched', 'Delivered', 'Cancelled'];
+
+      tbody.innerHTML = filtered.map(o => `
+        <tr>
+          <td><strong style="font-family: var(--font-mono); color: var(--gold);">${o.id}</strong></td>
+          <td>
+            <strong>${escapeHtml(o.name)}</strong>
+            <div style="font-size: 11.5px; color: var(--muted);">${escapeHtml(o.email)} · ${escapeHtml(o.city)}</div>
+          </td>
+          <td>
+            <div style="font-size: 12px;">
+              ${(o.items || []).map(i => `<div><strong>${escapeHtml(i.name)}</strong> × ${i.quantity}</div>`).join('')}
+            </div>
+          </td>
+          <td>
+            <div style="font-family: var(--font-mono); font-weight: 700;">Rs ${Number(o.total).toLocaleString()}</div>
+            ${o.discount ? `<div style="font-size: 11px; color: var(--green); font-family: var(--font-mono);">- Rs ${Number(o.discount).toLocaleString()} (${o.promo_code})</div>` : ''}
+          </td>
+          <td>
+            <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)" onclick="event.stopPropagation()">
+              ${statuses.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </td>
+          <td style="font-size: 11.5px; color: var(--muted); font-family: var(--font-mono); white-space: nowrap;">
+            ${formatDate(o.created_at)}
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px;">
+              <button class="btn btn-dark btn-sm" onclick="openOrderModal('${o.id}')">Invoice</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteOrder('${o.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateOrderStatus(id, newStatus) {
+      try {
+        const res = await fetch(`${API}/api/admin/orders/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error('Status update failed');
+        showToast(`Order ${id} marked as: ${newStatus}`, 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteOrder(id) {
+      if (!confirm(`Delete order record ${id} permanently?`)) return;
+      try {
+        const res = await fetch(`${API}/api/admin/orders/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        showToast(`Order ${id} deleted.`, 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function openOrderModal(id) {
+      const o = state.orders.find(x => x.id === id);
+      if (!o) return;
+
+      document.getElementById('om-title').textContent = `Order Invoice — ${o.id}`;
+      document.getElementById('om-body').innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 16px;">
+          <div>
+            <div style="font-family: var(--font-heading); font-size: 18px; color: var(--gold);">POLEX ATELIER INVOICE</div>
+            <div style="font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px;">POKHARA, NEPAL · HOSPITAL ROAD</div>
+          </div>
+          <span class="badge ${getStatusBadgeClass(o.status)}" style="font-size: 12px; padding: 5px 12px;">${o.status}</span>
+        </div>
+
+        <div class="grid-2col" style="margin-bottom: 20px;">
+          <div>
+            <div class="detail-label" style="text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 6px;">Client Information</div>
+            <div style="font-weight: 700; font-size: 14px;">${escapeHtml(o.name)}</div>
+            <div style="color: var(--muted); font-size: 12px;">${escapeHtml(o.email)}</div>
+          </div>
+          <div>
+            <div class="detail-label" style="text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 6px;">Delivery Destination</div>
+            <div style="font-weight: 600;">${escapeHtml(o.address)}</div>
+            <div style="color: var(--muted); font-size: 12px;">${escapeHtml(o.city)}, Nepal</div>
+            <div style="font-size: 11px; color: var(--dark-muted); margin-top: 4px;">Est. Dispatch: ${escapeHtml(o.estimated_delivery || '2-4 business days')}</div>
+          </div>
+        </div>
+
+        <div class="order-items-box">
+          <div class="detail-label" style="text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 8px;">Order Line Items</div>
+          ${(o.items || []).map(i => `
+            <div class="order-item-row">
+              <div>
+                <strong>${escapeHtml(i.name)}</strong>
+                ${i.customSpecs ? `<div style="font-size: 11px; color: var(--gold);">${escapeHtml(i.customSpecs.dialTone)} Dial · ${escapeHtml(i.customSpecs.engraving ? 'Engraving: ' + i.customSpecs.engraving : 'No Engraving')}</div>` : ''}
+              </div>
+              <div style="font-family: var(--font-mono); font-weight: 600;">
+                ${i.quantity} × Rs ${Number(i.price).toLocaleString()} = Rs ${(i.quantity * i.price).toLocaleString()}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div class="detail-row">
+            <span class="detail-label">Subtotal Amount</span>
+            <span class="detail-val" style="font-family: var(--font-mono);">Rs ${Number(o.subtotal).toLocaleString()}</span>
+          </div>
+          ${o.discount ? `
+            <div class="detail-row">
+              <span class="detail-label">Promotional Discount (${escapeHtml(o.promo_code)})</span>
+              <span class="detail-val" style="color: var(--green); font-family: var(--font-mono);">- Rs ${Number(o.discount).toLocaleString()}</span>
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="total-highlight">
+          <span style="font-weight: 700; font-size: 14px;">Grand Total (Tax Included)</span>
+          <span class="total-highlight-val">Rs ${Number(o.total).toLocaleString()}</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+          <button class="btn btn-dark" onclick="window.print()">Print Order Slip</button>
+          <button class="btn btn-gold" onclick="closeOrderModal()">Close</button>
+        </div>
+      `;
+
+      document.getElementById('order-modal').classList.add('open');
+    }
+
+    function closeOrderModal() {
+      document.getElementById('order-modal').classList.remove('open');
+    }
+
+    // ==========================================
+    // 4. APPOINTMENTS MANAGEMENT
+    // ==========================================
+    function renderAppointmentsTable() {
+      const q = (document.getElementById('appt-search')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('appt-filter-status')?.value || '';
+
+      const filtered = state.appointments.filter(a => {
+        const matchQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.phone.includes(q) || a.interest.toLowerCase().includes(q);
+        const matchStatus = !statusFilter || a.status === statusFilter;
+        return matchQ && matchStatus;
+      });
+
+      const tbody = document.getElementById('appointments-tbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No VIP booking appointments match your search.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(a => `
+        <tr>
+          <td><strong style="font-family: var(--font-mono); color: var(--gold);">${a.id}</strong></td>
+          <td><strong>${escapeHtml(a.name)}</strong></td>
+          <td>
+            <div>${escapeHtml(a.email)}</div>
+            <div style="font-size: 11.5px; color: var(--gold); font-family: var(--font-mono);">
+              <a href="tel:${a.phone}" style="color: inherit; text-decoration: none;">📞 ${escapeHtml(a.phone)}</a>
+            </div>
+          </td>
+          <td>
+            <strong style="font-size: 13px;">${escapeHtml(a.date)}</strong>
+            <div style="font-size: 11.5px; color: var(--muted);">${escapeHtml(a.time)}</div>
+          </td>
+          <td style="max-width: 180px; font-size: 12px; color: var(--text);">${escapeHtml(a.interest)}</td>
+          <td>
+            <select class="status-select" onchange="updateApptStatus('${a.id}', this.value)">
+              <option value="Confirmed" ${a.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+              <option value="Completed" ${a.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              <option value="Cancelled" ${a.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px;">
+              <a href="mailto:${a.email}?subject=Polex%20VIP%20Appointment%20Confirmation" class="btn btn-dark btn-sm">Email</a>
+              <button class="btn btn-danger btn-sm" onclick="deleteAppointment('${a.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateApptStatus(id, status) {
+      try {
+        const res = await fetch(`${API}/api/admin/appointments/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if (!res.ok) throw new Error('Update failed');
+        showToast(`Appointment ${id} status updated to: ${status}`, 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteAppointment(id) {
+      if (!confirm(`Delete booking record ${id}?`)) return;
+      try {
+        const res = await fetch(`${API}/api/admin/appointments/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        showToast('Appointment deleted.', 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ==========================================
+    // 5. PROMO CODES MANAGEMENT
+    // ==========================================
+    function renderPromosTable() {
+      const tbody = document.getElementById('promos-tbody');
+      if (state.promos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No promo codes created yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = state.promos.map(p => `
+        <tr>
+          <td><strong style="font-family: var(--font-mono); font-size: 14px; color: var(--gold);">${escapeHtml(p.code)}</strong></td>
+          <td style="font-weight: 600;">
+            ${p.discount_percent > 0 ? `${p.discount_percent}% Off Entire Bag` : `Rs ${Number(p.discount_flat).toLocaleString()} Flat Discount`}
+          </td>
+          <td style="font-family: var(--font-mono); color: var(--muted);">
+            ${p.min_order > 0 ? `Min. Rs ${Number(p.min_order).toLocaleString()}` : 'No Minimum'}
+          </td>
+          <td>
+            <span class="badge ${p.active ? 'badge-green' : 'badge-red'}">${p.active ? 'Active' : 'Disabled'}</span>
+          </td>
+          <td style="font-size: 11.5px; color: var(--muted); font-family: var(--font-mono);">${formatDate(p.created_at)}</td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px;">
+              <button class="btn btn-sm ${p.active ? 'btn-danger' : 'btn-success'}" onclick="togglePromoCode(${p.id})">
+                ${p.active ? 'Deactivate' : 'Activate'}
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="deletePromoCode(${p.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openPromoModal() {
+      document.getElementById('promo-form').reset();
+      document.getElementById('promo-modal').classList.add('open');
+    }
+    function closePromoModal() {
+      document.getElementById('promo-modal').classList.remove('open');
+    }
+
+    async function submitPromoForm() {
+      const payload = {
+        code: document.getElementById('prof-code').value.trim().toUpperCase(),
+        discount_percent: Number(document.getElementById('prof-percent').value) || 0,
+        discount_flat: Number(document.getElementById('prof-flat').value) || 0,
+        min_order: Number(document.getElementById('prof-min').value) || 0
+      };
+
+      try {
+        const res = await fetch(`${API}/api/admin/promos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Promo creation failed');
+
+        showToast(data.message, 'success');
+        closePromoModal();
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function togglePromoCode(id) {
+      try {
+        const res = await fetch(`${API}/api/admin/promos/${id}/toggle`, { method: 'PATCH' });
+        if (!res.ok) throw new Error('Toggle failed');
+        showToast('Promo status updated.', 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function deletePromoCode(id) {
+      if (!confirm('Delete promo code permanently?')) return;
+      try {
+        const res = await fetch(`${API}/api/admin/promos/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        showToast('Promo code deleted.', 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ==========================================
+    // 6. MESSAGES & INQUIRIES
+    // ==========================================
+    function renderMessages() {
+      const container = document.getElementById('messages-container');
+      if (state.messages.length === 0) {
+        container.innerHTML = `<div class="empty-state">No inquiries received from the contact form yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = state.messages.map(m => `
+        <div class="msg-card">
+          <div class="msg-header">
+            <div>
+              <div class="msg-sender">${escapeHtml(m.name)}</div>
+              <div class="msg-email">${escapeHtml(m.email)}</div>
+            </div>
+            <div class="msg-time">${formatDate(m.created_at)}</div>
+          </div>
+          <div class="msg-body">${escapeHtml(m.message)}</div>
+          <div class="msg-actions">
+            <a href="mailto:${m.email}?subject=Polex%20Concierge%20Response" class="btn btn-gold btn-sm">Reply via Email</a>
+            <button class="btn btn-danger btn-sm" onclick="deleteMessage(${m.id})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function deleteMessage(id) {
+      if (!confirm('Delete this inquiry message?')) return;
+      try {
+        const res = await fetch(`${API}/api/admin/messages/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        showToast('Message deleted.', 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ==========================================
+    // 7. SUBSCRIBERS MANAGEMENT
+    // ==========================================
+    function renderSubscribersTable() {
+      const tbody = document.getElementById('subscribers-tbody');
+      if (state.subscribers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No newsletter subscribers yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = state.subscribers.map((s, idx) => `
+        <tr>
+          <td style="color: var(--dark-muted); font-family: var(--font-mono);">${idx + 1}</td>
+          <td><strong style="color: var(--text);">${escapeHtml(s.email)}</strong></td>
+          <td style="font-size: 11.5px; color: var(--muted); font-family: var(--font-mono);">${formatDate(s.created_at)}</td>
+          <td style="text-align: right;">
+            <button class="btn btn-danger btn-sm" onclick="deleteSubscriber(${s.id}, '${escapeHtml(s.email)}')">Remove</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteSubscriber(id, email) {
+      if (!confirm(`Remove ${email} from subscriber list?`)) return;
+      try {
+        const res = await fetch(`${API}/api/admin/subscribers/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        showToast(`Subscriber ${email} removed.`, 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function exportSubscribersCSV() {
+      if (state.subscribers.length === 0) {
+        showToast('No subscribers to export.', 'error');
+        return;
+      }
+      let csv = 'ID,Email,Date Joined\n';
+      state.subscribers.forEach(s => {
+        csv += `${s.id},"${s.email}","${s.created_at}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `polex-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      showToast('Subscribers CSV exported.', 'success');
+    }
+
+    // ==========================================
+    // 8. SITE SETTINGS
+    // ==========================================
+    function populateSettingsForm() {
+      const s = state.settings || {};
+      if (document.getElementById('set-ticker_text')) document.getElementById('set-ticker_text').value = s.ticker_text || '';
+      if (document.getElementById('set-store_notice')) document.getElementById('set-store_notice').value = s.store_notice || '';
+      if (document.getElementById('set-atelier_phone')) document.getElementById('set-atelier_phone').value = s.atelier_phone || '';
+      if (document.getElementById('set-atelier_email')) document.getElementById('set-atelier_email').value = s.atelier_email || '';
+      if (document.getElementById('set-atelier_address')) document.getElementById('set-atelier_address').value = s.atelier_address || '';
+    }
+
+    async function saveSettingsForm() {
+      const payload = {
+        ticker_text: document.getElementById('set-ticker_text').value.trim(),
+        store_notice: document.getElementById('set-store_notice').value.trim(),
+        atelier_phone: document.getElementById('set-atelier_phone').value.trim(),
+        atelier_email: document.getElementById('set-atelier_email').value.trim(),
+        atelier_address: document.getElementById('set-atelier_address').value.trim()
+      };
+
+      try {
+        const res = await fetch(`${API}/api/admin/settings`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Saving failed');
+        showToast('Atelier and storefront settings updated live in SQLite.', 'success');
+        loadAllData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ==========================================
+    // UTILS
+    // ==========================================
+    function getStatusBadgeClass(status) {
+      switch (status) {
+        case 'Delivered':
+        case 'Completed':
+        case 'Confirmed': return 'badge-green';
+        case 'Ready for Dispatch': return 'badge-purple';
+        case 'Processing in Pokhara Atelier': return 'badge-amber';
+        case 'Dispatched': return 'badge-blue';
+        case 'Cancelled': return 'badge-red';
+        default: return 'badge-gray';
+      }
+    }
+
+    function formatDate(str) {
+      if (!str) return '—';
+      try {
+        const d = new Date(str);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch {
+        return str;
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    // Initialize
+    loadAllData();
+  </script>
 </body>
 </html>

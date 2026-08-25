@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
+    "better-sqlite3": "^13.0.3",
     "concurrently": "latest",
     "cors": "latest",
     "express": "latest",
@@ -20,8 +21,8 @@
     "react-dom": "latest"
   },
   "devDependencies": {
-    "tailwindcss": "latest",
     "@tailwindcss/vite": "latest",
+    "tailwindcss": "latest",
     "vite": "latest"
   }
 }

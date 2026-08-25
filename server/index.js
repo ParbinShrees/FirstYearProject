@@ -1,12 +1,9 @@
 import express from 'express'
 import cors from 'cors'
+import { stmts } from './db.js'
 
 const app = express()
 const port = process.env.PORT || 8787
-const subscribers = []
-const messages = []
-const orders = []
-const appointments = []
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || true }))
@@ -173,8 +170,9 @@ app.get('/api/products', (_req, res) => res.json({ products }))
 app.post('/api/newsletter', (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase()
   if (!emailPattern.test(email)) return res.status(400).json({ message: 'Please enter a valid email address.' })
-  if (subscribers.includes(email)) return res.status(200).json({ message: 'You are already on the private collector list.' })
-  subscribers.push(email)
+  const existing = stmts.findSubscriber.get(email)
+  if (existing) return res.status(200).json({ message: 'You are already on the private collector list.' })
+  stmts.insertSubscriber.run(email)
   res.status(201).json({ message: 'Welcome to the Polex Collector Club. 10% code POLEX10 applied.' })
 })
 
@@ -188,7 +186,7 @@ app.post('/api/contact', (req, res) => {
   if (name.length > 100 || message.length > 2000) {
     return res.status(400).json({ message: 'Please keep your message concise.' })
   }
-  messages.push({ name, email, message, createdAt: new Date().toISOString() })
+  stmts.insertMessage.run(name, email, message)
   res.status(201).json({ message: 'Message received. Our Pokhara atelier will contact you shortly.' })
 })
 
@@ -216,7 +214,7 @@ app.post('/api/appointments', (req, res) => {
     status: 'Confirmed',
     createdAt: new Date().toISOString()
   }
-  appointments.push(appointment)
+  stmts.insertAppointment.run(appointment)
   res.status(201).json({
     message: 'VIP Studio appointment confirmed. We look forward to welcoming you.',
     appointment
@@ -278,21 +276,21 @@ app.post('/api/orders', (req, res) => {
     email,
     address,
     city,
-    items: orderItems,
+    items_json: JSON.stringify(orderItems),
     subtotal,
     discount,
-    promoCode: promoCode || null,
+    promo_code: promoCode || null,
     total,
     status: 'Processing in Pokhara Atelier',
-    estimatedDelivery: '2-4 business days',
+    estimated_delivery: '2-4 business days',
     createdAt: new Date().toISOString()
   }
 
-  orders.push(order)
+  stmts.insertOrder.run(order)
   res.status(201).json({
     message: 'Your order request has been confirmed. Our master horologists are preparing your piece.',
     orderId: order.id,
-    order
+    order: { ...order, items: orderItems }
   })
 })
 

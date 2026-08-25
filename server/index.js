@@ -198,6 +198,31 @@ app.get('/admin', (_req, res) => {
   } catch { res.status(404).send('Admin panel not found') }
 })
 
+// Admin mutation routes
+app.patch('/api/admin/orders/:id', (req, res) => {
+  const { status } = req.body || {}
+  if (!status) return res.status(400).json({ message: 'Status required' })
+  stmts.updateOrderStatus.run(status, req.params.id)
+  res.json({ ok: true, status })
+})
+
+app.patch('/api/admin/appointments/:id', (req, res) => {
+  const { status } = req.body || {}
+  if (!status) return res.status(400).json({ message: 'Status required' })
+  stmts.updateAppointmentStatus.run(status, req.params.id)
+  res.json({ ok: true, status })
+})
+
+app.delete('/api/admin/messages/:id', (req, res) => {
+  stmts.deleteMessage.run(Number(req.params.id))
+  res.json({ ok: true })
+})
+
+app.delete('/api/admin/subscribers/:id', (req, res) => {
+  stmts.deleteSubscriber.run(Number(req.params.id))
+  res.json({ ok: true })
+})
+
 app.post('/api/newsletter', (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase()
   if (!emailPattern.test(email)) return res.status(400).json({ message: 'Please enter a valid email address.' })

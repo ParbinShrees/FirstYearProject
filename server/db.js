@@ -1,4 +1,4 @@
-﻿import Database from 'better-sqlite3'
+import Database from 'better-sqlite3'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -60,11 +60,15 @@ db.prepare(
 ).run()
 
 export const stmts = {
-  findSubscriber:    db.prepare('SELECT email FROM subscribers WHERE email = ?'),
-  insertSubscriber:  db.prepare('INSERT INTO subscribers (email) VALUES (?)'),
-  insertMessage:     db.prepare('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)'),
-  insertAppointment: db.prepare('INSERT INTO appointments (id, name, email, phone, date, time, interest, location) VALUES (@id, @name, @email, @phone, @date, @time, @interest, @location)'),
-  insertOrder:       db.prepare('INSERT INTO orders (id, name, email, address, city, items_json, subtotal, discount, promo_code, total) VALUES (@id, @name, @email, @address, @city, @items_json, @subtotal, @discount, @promo_code, @total)'),
+  findSubscriber:          db.prepare('SELECT email FROM subscribers WHERE email = ?'),
+  insertSubscriber:        db.prepare('INSERT INTO subscribers (email) VALUES (?)'),
+  insertMessage:           db.prepare('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)'),
+  insertAppointment:       db.prepare('INSERT INTO appointments (id, name, email, phone, date, time, interest, location) VALUES (@id, @name, @email, @phone, @date, @time, @interest, @location)'),
+  insertOrder:             db.prepare('INSERT INTO orders (id, name, email, address, city, items_json, subtotal, discount, promo_code, total) VALUES (@id, @name, @email, @address, @city, @items_json, @subtotal, @discount, @promo_code, @total)'),
+  updateOrderStatus:       db.prepare('UPDATE orders SET status = ? WHERE id = ?'),
+  updateAppointmentStatus: db.prepare('UPDATE appointments SET status = ? WHERE id = ?'),
+  deleteMessage:           db.prepare('DELETE FROM messages WHERE id = ?'),
+  deleteSubscriber:        db.prepare('DELETE FROM subscribers WHERE id = ?'),
 }
 
 export default db

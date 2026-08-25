@@ -1,0 +1,179 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Polex Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #d4af37;
+    --ink: #0e0e0e;
+    --paper: #faf9f7;
+    --muted: #888;
+    --border: #e0ddd8;
+    --card: #fff;
+    --red: #c0392b;
+    --green: #27ae60;
+  }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+  header { background: var(--ink); color: var(--paper); padding: 20px 40px; display: flex; align-items: center; gap: 16px; }
+  header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.08em; }
+  header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+  nav { display: flex; gap: 4px; padding: 20px 40px 0; border-bottom: 1px solid var(--border); background: var(--card); }
+  nav button { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  nav button.active { color: var(--ink); border-bottom-color: var(--gold); }
+  nav button:hover { color: var(--ink); }
+  main { padding: 32px 40px; max-width: 1200px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--ink); }
+  .stat-value span { font-size: 13px; color: var(--gold); font-weight: 500; margin-left: 4px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .badge { background: var(--gold); color: var(--ink); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13px; }
+  thead th { text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); background: #f7f6f3; border-bottom: 1px solid var(--border); }
+  tbody td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fdfcfa; }
+  .status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .status.confirmed { background: #eafaf1; color: var(--green); }
+  .status.processing { background: #fef9e7; color: #b7950b; }
+  .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; }
+  .refresh { margin-left: auto; padding: 8px 16px; background: var(--ink); color: var(--paper); border: none; border-radius: 6px; font-size: 12px; cursor: pointer; letter-spacing: 0.05em; }
+  .refresh:hover { background: #222; }
+  .items-list { font-size: 12px; color: var(--muted); }
+  .items-list strong { color: var(--ink); }
+  .price { font-family: 'Courier New', monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="dot"></div>
+  <h1>POLEX ADMIN PANEL</h1>
+  <button class="refresh" onclick="loadAll()">Refresh</button>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">Total Orders</div><div class="stat-value" id="s-orders">—</div></div>
+  <div class="stat"><div class="stat-label">Appointments</div><div class="stat-value" id="s-appts">—</div></div>
+  <div class="stat"><div class="stat-label">Subscribers</div><div class="stat-value" id="s-subs">—</div></div>
+  <div class="stat"><div class="stat-label">Messages</div><div class="stat-value" id="s-msgs">—</div></div>
+</div>
+
+<nav>
+  <button class="active" onclick="show('orders', this)">Orders</button>
+  <button onclick="show('appointments', this)">Appointments</button>
+  <button onclick="show('subscribers', this)">Subscribers</button>
+  <button onclick="show('messages', this)">Messages</button>
+</nav>
+
+<main>
+  <div id="panel-orders" class="panel active">
+    <div class="panel-title">Orders <span class="badge" id="b-orders">0</span></div>
+    <div id="tbl-orders"></div>
+  </div>
+  <div id="panel-appointments" class="panel">
+    <div class="panel-title">Appointments <span class="badge" id="b-appts">0</span></div>
+    <div id="tbl-appts"></div>
+  </div>
+  <div id="panel-subscribers" class="panel">
+    <div class="panel-title">Newsletter Subscribers <span class="badge" id="b-subs">0</span></div>
+    <div id="tbl-subs"></div>
+  </div>
+  <div id="panel-messages" class="panel">
+    <div class="panel-title">Contact Messages <span class="badge" id="b-msgs">0</span></div>
+    <div id="tbl-msgs"></div>
+  </div>
+</main>
+
+<script>
+const API = 'http://localhost:8787'
+
+function show(tab, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'))
+  document.getElementById('panel-' + tab).classList.add('active')
+  btn.classList.add('active')
+}
+
+function fmt(d) {
+  return new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+}
+function money(n) { return 'NPR ' + Number(n).toLocaleString() }
+
+async function loadAll() {
+  const [orders, appts, subs, msgs] = await Promise.all([
+    fetch(API + '/api/admin/orders').then(r => r.json()),
+    fetch(API + '/api/admin/appointments').then(r => r.json()),
+    fetch(API + '/api/admin/subscribers').then(r => r.json()),
+    fetch(API + '/api/admin/messages').then(r => r.json()),
+  ])
+
+  document.getElementById('s-orders').textContent = orders.count
+  document.getElementById('s-appts').textContent = appts.count
+  document.getElementById('s-subs').textContent = subs.count
+  document.getElementById('s-msgs').textContent = msgs.count
+  document.getElementById('b-orders').textContent = orders.count
+  document.getElementById('b-appts').textContent = appts.count
+  document.getElementById('b-subs').textContent = subs.count
+  document.getElementById('b-msgs').textContent = msgs.count
+
+  // Orders
+  document.getElementById('tbl-orders').innerHTML = orders.count === 0
+    ? '<div class="empty">No orders yet.</div>'
+    : `<table><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>
+      ${orders.data.map(o => `<tr>
+        <td><code>${o.id}</code></td>
+        <td><strong>${o.name}</strong><br/><small>${o.email}</small><br/><small>${o.city}</small></td>
+        <td><div class="items-list">${(o.items||[]).map(i => `<strong>${i.name}</strong> x${i.quantity}`).join('<br/>')}</div></td>
+        <td class="price">${money(o.total)}${o.discount ? `<br/><small style="color:#27ae60">-${money(o.discount)} discount</small>` : ''}</td>
+        <td><span class="status processing">${o.status}</span></td>
+        <td>${fmt(o.created_at)}</td>
+      </tr>`).join('')}
+      </tbody></table>`
+
+  // Appointments
+  document.getElementById('tbl-appts').innerHTML = appts.count === 0
+    ? '<div class="empty">No appointments yet.</div>'
+    : `<table><thead><tr><th>Booking ID</th><th>Guest</th><th>Date & Time</th><th>Interest</th><th>Status</th></tr></thead><tbody>
+      ${appts.data.map(a => `<tr>
+        <td><code>${a.id}</code></td>
+        <td><strong>${a.name}</strong><br/><small>${a.email}</small><br/><small>${a.phone}</small></td>
+        <td>${a.date}<br/><small>${a.time}</small></td>
+        <td>${a.interest}</td>
+        <td><span class="status confirmed">${a.status}</span></td>
+      </tr>`).join('')}
+      </tbody></table>`
+
+  // Subscribers
+  document.getElementById('tbl-subs').innerHTML = subs.count === 0
+    ? '<div class="empty">No subscribers yet.</div>'
+    : `<table><thead><tr><th>#</th><th>Email</th><th>Joined</th></tr></thead><tbody>
+      ${subs.data.map((s, i) => `<tr>
+        <td>${s.id}</td>
+        <td>${s.email}</td>
+        <td>${fmt(s.created_at)}</td>
+      </tr>`).join('')}
+      </tbody></table>`
+
+  // Messages
+  document.getElementById('tbl-msgs').innerHTML = msgs.count === 0
+    ? '<div class="empty">No messages yet.</div>'
+    : `<table><thead><tr><th>From</th><th>Email</th><th>Message</th><th>Date</th></tr></thead><tbody>
+      ${msgs.data.map(m => `<tr>
+        <td><strong>${m.name}</strong></td>
+        <td>${m.email}</td>
+        <td style="max-width:320px">${m.message}</td>
+        <td>${fmt(m.created_at)}</td>
+      </tr>`).join('')}
+      </tbody></table>`
+}
+
+loadAll()
+</script>
+</body>
+</html>

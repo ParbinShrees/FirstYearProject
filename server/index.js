@@ -1,6 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import { stmts } from './db.js'
+import { stmts, default as db } from './db.js'
 
 const app = express()
 const port = process.env.PORT || 8787
@@ -166,6 +166,37 @@ const products = [
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'polex-api' }))
 app.get('/api/products', (_req, res) => res.json({ products }))
+
+// ADMIN ROUTES
+app.get('/api/admin/subscribers', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM subscribers ORDER BY created_at DESC').all()
+  res.json({ count: rows.length, data: rows })
+})
+app.get('/api/admin/messages', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM messages ORDER BY created_at DESC').all()
+  res.json({ count: rows.length, data: rows })
+})
+app.get('/api/admin/appointments', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM appointments ORDER BY created_at DESC').all()
+  res.json({ count: rows.length, data: rows })
+})
+app.get('/api/admin/orders', (_req, res) => {
+  const rows = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all()
+  const parsed = rows.map(r => ({ ...r, items: JSON.parse(r.items_json) }))
+  res.json({ count: parsed.length, data: parsed })
+})
+
+// Admin dashboard HTML
+import { readFileSync } from 'fs'
+import { join as pjoin, dirname as pdirname } from 'path'
+import { fileURLToPath as ftu } from 'url'
+const __dir = pdirname(ftu(import.meta.url))
+app.get('/admin', (_req, res) => {
+  try {
+    res.setHeader('Content-Type', 'text/html')
+    res.send(readFileSync(pjoin(__dir, 'admin.html'), 'utf8'))
+  } catch { res.status(404).send('Admin panel not found') }
+})
 
 app.post('/api/newsletter', (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase()

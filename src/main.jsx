@@ -1,4 +1,4 @@
-import { StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   ArrowRight,
@@ -375,7 +375,10 @@ function App() {
     audioEngine.enabled = soundEnabled
   }, [soundEnabled])
 
-  // Load backend products
+  // Site Settings (Ticker, phone, address from SQLite)
+  const [siteSettings, setSiteSettings] = useState(null)
+
+  // Load backend products & site settings
   useEffect(() => {
     const controller = new AbortController()
     fetch('/api/products', { signal: controller.signal })
@@ -386,6 +389,16 @@ function App() {
         }
       })
       .catch(() => {})
+
+    fetch('/api/settings', { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (data && data.settings) {
+          setSiteSettings(data.settings)
+        }
+      })
+      .catch(() => {})
+
     return () => controller.abort()
   }, [])
 
@@ -725,25 +738,24 @@ function App() {
         {/* MINIMALIST TICKER */}
         <section className="ticker">
           <div className="ticker-track">
-            <span>Hand-Crafted in Pokhara</span>
-            <span className="ticker-sep">·</span>
-            <span>Double Anti-Reflective Sapphire Crystal</span>
-            <span className="ticker-sep">·</span>
-            <span>72-Hour Automatic Power Reserve</span>
-            <span className="ticker-sep">·</span>
-            <span>Calibre PX Series</span>
-            <span className="ticker-sep">·</span>
-            <span>Insured Nationwide Delivery</span>
-            <span className="ticker-sep">·</span>
-            <span>Hand-Crafted in Pokhara</span>
-            <span className="ticker-sep">·</span>
-            <span>Double Anti-Reflective Sapphire Crystal</span>
-            <span className="ticker-sep">·</span>
-            <span>72-Hour Automatic Power Reserve</span>
-            <span className="ticker-sep">·</span>
-            <span>Calibre PX Series</span>
-            <span className="ticker-sep">·</span>
-            <span>Insured Nationwide Delivery</span>
+            {(() => {
+              const items = siteSettings?.ticker_text
+                ? siteSettings.ticker_text.split('·').map((s) => s.trim()).filter(Boolean)
+                : [
+                    'Hand-Crafted in Pokhara',
+                    'Double Anti-Reflective Sapphire Crystal',
+                    '72-Hour Automatic Power Reserve',
+                    'Calibre PX Series',
+                    'Insured Nationwide Delivery'
+                  ]
+              const repeated = [...items, ...items, ...items]
+              return repeated.map((item, idx) => (
+                <Fragment key={idx}>
+                  <span>{item}</span>
+                  <span className="ticker-sep">·</span>
+                </Fragment>
+              ))
+            })()}
           </div>
         </section>
 
@@ -1897,18 +1909,35 @@ function CartDrawer({ items, total, formatPrice, onClose, onChangeQuantity, onCh
 
   const finalTotal = Math.max(0, total - promoDiscount)
 
-  function applyPromo(e) {
+  async function applyPromo(e) {
     e.preventDefault()
     audioEngine.ratchet()
     const code = promoCode.trim().toUpperCase()
-    if (code === 'POLEX10') {
-      setPromoDiscount(Math.round(total * 0.1))
-      setError('')
-    } else if (code === 'POKHARA') {
-      setPromoDiscount(Math.round(total * 0.15))
-      setError('')
-    } else {
-      setError('Invalid promotion code. Try POLEX10 or POKHARA.')
+    if (!code) return
+    try {
+      const res = await fetch('/api/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, subtotal: total })
+      })
+      const data = await res.json()
+      if (res.ok && data.valid) {
+        setPromoDiscount(data.discount)
+        setError('')
+      } else {
+        setPromoDiscount(0)
+        setError(data.message || 'Invalid promotional code.')
+      }
+    } catch {
+      if (code === 'POLEX10') {
+        setPromoDiscount(Math.round(total * 0.1))
+        setError('')
+      } else if (code === 'POKHARA') {
+        setPromoDiscount(Math.round(total * 0.15))
+        setError('')
+      } else {
+        setError('Invalid promotion code. Try POLEX10 or POKHARA.')
+      }
     }
   }
 

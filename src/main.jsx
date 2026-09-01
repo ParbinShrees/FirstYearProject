@@ -402,6 +402,34 @@ function App() {
     return () => controller.abort()
   }, [])
 
+  // Smart Scroll-Up Navbar State
+  const [navVisible, setNavVisible] = useState(true)
+  const [navScrolled, setNavScrolled] = useState(false)
+  const lastScrollY = useRef(0)
+
+  // Smart Navbar Scroll Listener (Hides on scroll down, reveals on scroll up)
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY <= 60) {
+        setNavVisible(true)
+        setNavScrolled(false)
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 120) {
+        // Scrolling down -> hide navbar
+        setNavVisible(false)
+        setNavScrolled(true)
+      } else if (currentScrollY < lastScrollY.current) {
+        // Scrolling up -> reveal sticky glass navbar
+        setNavVisible(true)
+        setNavScrolled(true)
+      }
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   // Keyboard shortcut: Cmd/Ctrl + K for search
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -457,6 +485,7 @@ function App() {
     audioEngine.chime()
     setCart((prev) => [...prev, product])
     showNotice(`${product.name} added to bag`)
+    setCartOpen(true)
   }
 
   function toggleWishlist(product) {
@@ -570,7 +599,7 @@ function App() {
       )}
 
       {/* NAVIGATION */}
-      <header className="nav-wrap">
+      <header className={`nav-wrap ${navScrolled ? 'nav-scrolled' : ''} ${navVisible ? 'nav-visible' : 'nav-hidden'}`}>
         <div className="container nav">
           <button className="wordmark" onClick={() => scrollToSection('top')} aria-label="Polex Atelier Home">
             <span>P</span>OLEX
@@ -1091,6 +1120,22 @@ function App() {
       {/* RECEIPT MODAL */}
       {receiptOrder && (
         <ReceiptModal order={receiptOrder} formatPrice={formatPrice} onClose={() => setReceiptOrder(null)} />
+      )}
+
+      {/* FLOATING QUICK-ACCESS BAG BUTTON ON SCROLL */}
+      {cart.length > 0 && !cartOpen && (
+        <button
+          className="floating-cart-pill"
+          onClick={() => {
+            audioEngine.ratchet()
+            setCartOpen(true)
+          }}
+          aria-label="View Shopping Bag"
+        >
+          <ShoppingBag size={17} />
+          <span>Bag ({cart.length})</span>
+          <span className="floating-cart-total">{formatPrice(cartTotal)}</span>
+        </button>
       )}
     </div>
   )

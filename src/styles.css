@@ -61,19 +61,38 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   outline-offset: 3px;
 }
 
-.site-shell { overflow: hidden; position: relative; }
+.site-shell {
+  overflow: hidden;
+  position: relative;
+  padding-top: 80px;
+}
 .container { width: min(1240px, calc(100% - 48px)); margin: 0 auto; }
 
-/* NAV */
+/* SMART SCROLL-UP NAVBAR */
 .nav-wrap {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
-  background: rgba(var(--paper), 0.85);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 90;
+  background: rgba(var(--paper), 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--line);
-  transition: all 0.3s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, box-shadow 0.3s ease;
+  transform: translateY(0);
+}
+.nav-wrap.nav-hidden {
+  transform: translateY(-100%);
+}
+.nav-wrap.nav-visible {
+  transform: translateY(0);
+}
+.nav-wrap.nav-scrolled {
+  background: rgba(var(--paper), 0.95);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-bottom-color: rgba(212, 175, 55, 0.25);
 }
 .nav {
   height: 80px;
@@ -1240,6 +1259,55 @@ em {
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(-15px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* FLOATING QUICK-ACCESS CART PILL */
+.floating-cart-pill {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--gold);
+  border-radius: 40px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: floatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.floating-cart-pill:hover {
+  background: var(--gold);
+  color: var(--ink);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(212, 175, 55, 0.35);
+}
+.floating-cart-total {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+.floating-cart-pill:hover .floating-cart-total {
+  border-left-color: rgba(0, 0, 0, 0.3);
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* RESPONSIVE */

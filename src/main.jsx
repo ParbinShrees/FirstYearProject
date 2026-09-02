@@ -344,7 +344,7 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [bookingOpen, setBookingOpen] = useState(false)
   const [activeArticle, setActiveArticle] = useState(null)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(null)
   const [receiptOrder, setReceiptOrder] = useState(null)
 
   // Newsletter
@@ -360,11 +360,11 @@ function App() {
     }).format(converted)}`
   }, [currency])
 
-  const showNotice = useCallback((message, chime = false) => {
+  const showNotice = useCallback((message, chime = false, isCart = false) => {
     window.clearTimeout(noticeTimer.current)
-    setNotice(message)
+    setNotice({ text: message, isCart })
     if (chime) audioEngine.chime()
-    noticeTimer.current = window.setTimeout(() => setNotice(''), 3200)
+    noticeTimer.current = window.setTimeout(() => setNotice(null), 3800)
   }, [])
 
   useEffect(() => {
@@ -484,8 +484,7 @@ function App() {
   function addToCart(product) {
     audioEngine.chime()
     setCart((prev) => [...prev, product])
-    showNotice(`${product.name} added to bag`)
-    setCartOpen(true)
+    showNotice(`${product.name} added to bag`, false, true)
   }
 
   function toggleWishlist(product) {
@@ -594,7 +593,19 @@ function App() {
       {notice && (
         <div className="toast">
           <span className="toast-dot" />
-          <span>{notice}</span>
+          <span>{typeof notice === 'string' ? notice : notice.text}</span>
+          {notice?.isCart && (
+            <button
+              className="toast-action-btn"
+              onClick={() => {
+                audioEngine.ratchet()
+                setCartOpen(true)
+                setNotice(null)
+              }}
+            >
+              View Bag →
+            </button>
+          )}
         </div>
       )}
 

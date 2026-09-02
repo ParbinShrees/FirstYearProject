@@ -1235,6 +1235,24 @@ em {
   background: var(--gold);
   flex-shrink: 0;
 }
+.toast-action-btn {
+  margin-left: 8px;
+  background: var(--gold);
+  color: #0d0d0d;
+  border: 0;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.toast-action-btn:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
 
 /* KEYFRAMES */
 @keyframes float {

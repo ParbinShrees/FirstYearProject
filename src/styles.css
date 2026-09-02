@@ -1313,6 +1313,18 @@ em {
   background: rgba(192, 57, 43, 0.08);
 }
 
+/* CART FOOTER (Sticky Checkout Area) */
+.cart-footer {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 8px;
+  background: var(--paper);
+}
+.cart-empty {
+  padding: 48px 24px;
+  color: var(--muted);
+}
+
 /* TOAST */
 .toast {
   position: fixed;

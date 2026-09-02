@@ -256,11 +256,33 @@ app.post('/api/orders', (req, res) => {
   })
 })
 
+// Get all orders (public, for order lookup / receipts)
+app.get('/api/orders', (_req, res) => {
+  try {
+    const rows = stmts.getAllOrders.all()
+    const data = rows.map(r => ({ ...r, items: JSON.parse(r.items_json) }))
+    res.json({ count: data.length, data })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
+// Get all appointments (public, for booking confirmation lookup)
+app.get('/api/appointments', (_req, res) => {
+  try {
+    const data = stmts.getAllAppointments.all()
+    res.json({ count: data.length, data })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 // ==========================================
 // ADMIN DASHBOARD REST API (FULL CRUD)
 // ==========================================
 
-// 1. Dashboard Analytics Summary
+// 1. Dashboard Analytics Summary — also aliased at /api/admin/stats
+app.get('/api/admin/stats', (_req, res) => res.redirect('/api/admin/analytics'))
 app.get('/api/admin/analytics', (_req, res) => {
   try {
     const orders = stmts.getAllOrders.all().map(o => ({ ...o, items: JSON.parse(o.items_json) }))

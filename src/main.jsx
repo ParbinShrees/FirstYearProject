@@ -1858,7 +1858,8 @@ function AppointmentModal({ onClose, onSuccess }) {
                 type="date"
                 className="form-input"
                 required
-                defaultValue="2026-08-28"
+                defaultValue={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
             <div className="form-group">

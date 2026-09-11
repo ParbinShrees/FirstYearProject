@@ -295,14 +295,20 @@ app.post('/api/orders', (req, res) => {
   for (const item of items) {
     if (item.isCustom) {
       const customPrice = Number(item.price) || 165000
+      const customQuantity = Number.isInteger(item.quantity) ? item.quantity : Number(item.quantity) || 1
+
+      if (!Number.isInteger(customQuantity) || customQuantity < 1 || customQuantity > 10) {
+        return res.status(400).json({ message: 'One or more bag items are invalid.' })
+      }
+
       orderItems.push({
         id: item.id || 'custom-bespoke',
         name: item.name || 'Bespoke Polex Commission',
         price: customPrice,
-        quantity: item.quantity || 1,
+        quantity: customQuantity,
         customSpecs: item.customSpecs || null
       })
-      subtotal += customPrice * (item.quantity || 1)
+      subtotal += customPrice * customQuantity
     } else {
       const product = products.find((p) => p.id === String(item.id))
       if (!product || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 10) {
